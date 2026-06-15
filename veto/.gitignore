@@ -113,3 +113,15 @@ app.*.map.json
 
 # Generated l10n files
 lib/l10n/gen/
+
+# Flutter/Dart generated files
+.flutter-plugins
+.flutter-plugins-dependencies
+.dart_tool/
+.packages
+.pub/
+build/
+
+# Platform-specific generated files
+ios/.generated/
+android/app/google-services.json
