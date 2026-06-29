@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:veto/counter/counter.dart';
+import 'package:veto/features/home/view/home_page.dart';
 import 'package:veto/l10n/l10n.dart';
 
 class App extends StatelessWidget {
@@ -16,7 +16,8 @@ class App extends StatelessWidget {
       ),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const CounterPage(),
+      // 2. Point home to your new HomePage widget
+      home: const HomePage(), 
     );
   }
 }
