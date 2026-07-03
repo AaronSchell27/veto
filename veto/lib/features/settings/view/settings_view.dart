@@ -12,11 +12,12 @@ class SettingsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: const Text('Settings')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: const [
           ListTile(
-            title: Text('Theme'),
+            title: Text('Dark Mode'),
             trailing: DarkModeSwitch(),
           ),
         ],
