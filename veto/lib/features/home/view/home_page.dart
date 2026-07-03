@@ -1,22 +1,18 @@
-// lib/features/home/bloc/home_bloc.dart
+// lib/features/home/view/home_page.dart
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:veto/features/home/bloc/home_event.dart';
-import 'package:veto/features/home/bloc/home_state.dart';
+import 'package:veto/features/home/bloc/home_bloc.dart';
+import 'package:veto/features/home/view/home_view.dart';
 
-// lib/features/home/bloc/home_event.dart
-abstract class HomeEvent {}
-class ToggleThemeEvent extends HomeEvent {}
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
 
-// lib/features/home/bloc/home_state.dart
-class HomeState {
-  const HomeState({this.isDarkMode = false});
-  final bool isDarkMode;
-}
-
-class HomeBloc extends Bloc<HomeEvent, HomeState> {
-  HomeBloc() : super(const HomeState()) {
-    on<ToggleThemeEvent>((event, emit) {
-      emit(HomeState(isDarkMode: !state.isDarkMode));
-    });
+  @override
+  Widget build(BuildContext context) {
+    // This provides the HomeBloc to your HomeView and all of its tabs
+    return BlocProvider(
+      create: (context) => HomeBloc(),
+      child: const HomeView(),
+    );
   }
 }

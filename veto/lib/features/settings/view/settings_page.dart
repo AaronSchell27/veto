@@ -1,22 +1,17 @@
-// lib/features/settings/bloc/settings_bloc.dart
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:veto/features/settings/bloc/settings_event.dart';
-import 'package:veto/features/settings/bloc/settings_state.dart';
+import 'package:veto/features/settings/bloc/settings_bloc.dart';
+import 'package:veto/features/settings/view/settings_view.dart'; // Create this for your settings UI
 
-// lib/features/settings/bloc/settings_event.dart
-abstract class SettingsEvent {}
-class ToggleThemeEvent extends SettingsEvent {}
+class SettingsPage extends StatelessWidget {
+  const SettingsPage({super.key});
 
-// lib/features/settings/bloc/settings_state.dart
-class SettingsState {
-  const SettingsState({this.isDarkMode = false});
-  final bool isDarkMode;
-}
-
-class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
-  SettingsBloc() : super(const SettingsState()) {
-    on<ToggleThemeEvent>((event, emit) {
-      emit(SettingsState(isDarkMode: !state.isDarkMode));
-    });
+  @override
+  Widget build(BuildContext context) {
+    // This is where you provide your Bloc so the UI can use it!
+    return BlocProvider(
+      create: (context) => SettingsBloc(),
+      child: const SettingsView(), 
+    );
   }
 }

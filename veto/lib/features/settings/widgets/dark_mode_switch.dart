@@ -10,7 +10,7 @@ class DarkModeSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = context.select((SettingsBloc bloc) => bloc.state.isDarkMode);
+    final isDark = context.select<SettingsBloc, bool>((bloc) => bloc.state.isDarkMode);
 
     return Switch(
       value: isDark,
