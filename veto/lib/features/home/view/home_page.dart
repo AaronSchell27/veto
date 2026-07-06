@@ -9,10 +9,9 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // This provides the HomeBloc to your HomeView and all of its tabs
     return BlocProvider(
       create: (context) => HomeBloc(),
-      child: const HomeView(),
+      child: const HomeView(), // This loads your persistent navigation layout
     );
   }
 }

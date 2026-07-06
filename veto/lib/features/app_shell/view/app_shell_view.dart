@@ -1,22 +1,23 @@
-// lib/features/home/view/home_view.dart
+// lib/features/app_shell/view/app_shell_view.dart
 import 'package:flutter/material.dart';
 import 'package:veto/features/account/account.dart';
+import 'package:veto/features/home/home.dart'; // Imports your curated content page
 import 'package:veto/features/news/news.dart';
 import 'package:veto/features/settings/settings.dart';
 import 'package:veto/features/vote/vote.dart';
 
-class HomeView extends StatefulWidget {
-  const HomeView({super.key});
+class AppShellView extends StatefulWidget {
+  const AppShellView({super.key});
 
   @override
-  State<HomeView> createState() => _HomeViewState();
+  State<AppShellView> createState() => _AppShellViewState();
 }
 
-class _HomeViewState extends State<HomeView> {
+class _AppShellViewState extends State<AppShellView> {
   int _currentIndex = 0;
 
   late final List<Widget> _tabs = [
-    const HomeFeedContent(), // 1. Your curated content page goes here!
+    const HomePage(), // Clean, distinct feature page now injected here
     const VotePage(),
     const NewsPage(),
     const AccountPage(),
@@ -44,34 +45,6 @@ class _HomeViewState extends State<HomeView> {
           BottomNavigationBarItem(icon: Icon(Icons.newspaper), label: 'News'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Account'),
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
-        ],
-      ),
-    );
-  }
-}
-
-// 2. This is the actual aggregated content "page" widget for your first tab.
-// Notice it has NO Scaffold or bottom navigation bar of its own.
-class HomeFeedContent extends StatelessWidget {
-  const HomeFeedContent({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Text(
-            'Curated Feed',
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
-          const SizedBox(height: 16),
-          const Card(
-            child: ListTile(
-              title: Text('Aggregated Content Example'),
-              subtitle: Text('Your news, voting updates, etc. merge here.'),
-            ),
-          ),
         ],
       ),
     );
