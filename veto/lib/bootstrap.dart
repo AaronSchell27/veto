@@ -1,11 +1,11 @@
+// lib/bootstrap.dart
+
 import 'dart:async';
 import 'dart:developer';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/widgets.dart';
-
-import 'package:supabase_flutter/supabase_flutter.dart';
-
+import 'package:supabase_database_client/supabase_database_client.dart';
 
 class AppBlocObserver extends BlocObserver {
   const AppBlocObserver();
@@ -23,12 +23,13 @@ class AppBlocObserver extends BlocObserver {
   }
 }
 
-Future<void> bootstrap(FutureOr<Widget> Function() builder) async {
+/// Boots up the core application framework.
+/// Accepts the pre-initialized [SupabaseDatabaseClient] to inject down into the widget tree.
+Future<void> bootstrap({
+  required SupabaseDatabaseClient databaseClient,
+  required FutureOr<Widget> Function() builder,
+}) async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Supabase.initialize(
-    url: 'https://rttcxycxzitlwwkbtnoj.supabase.co/rest/v1/',
-    anonKey: 'sb_publishable_FhXgMdId4X-lTiJIDtJgpw_EvyCNdaf',
-  );
   
   FlutterError.onError = (details) {
     log(details.exceptionAsString(), stackTrace: details.stack);

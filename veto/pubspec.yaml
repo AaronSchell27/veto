@@ -16,7 +16,8 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: ^0.20.2
-  supabase_flutter: ^2.0.0
+  supabase_database_client:
+    path: packages/supabase_database_client
 
 dev_dependencies:
   bloc_lint: ^0.4.1

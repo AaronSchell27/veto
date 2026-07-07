@@ -1,0 +1,10 @@
+name: supabase_database_client
+description: A clean client package to manage the Supabase database connection.
+version: 1.0.0+1
+publish_to: none
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  supabase_flutter: ^2.8.0 # Use the latest stable version of supabase_flutter

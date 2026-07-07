@@ -874,8 +874,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.10.6"
-  supabase_flutter:
+  supabase_database_client:
     dependency: "direct main"
+    description:
+      path: "packages/supabase_database_client"
+      relative: true
+    source: path
+    version: "1.0.0+1"
+  supabase_flutter:
+    dependency: transitive
     description:
       name: supabase_flutter
       sha256: c02ce58abcaf86cb8055ad40bfd98bbf5b93fed3b5b56b8220d88ed03842818b
