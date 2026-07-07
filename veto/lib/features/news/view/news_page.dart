@@ -7,7 +7,6 @@ class NewsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // This is a plain Widget. Later, you'll wrap NewsView in a BlocProvider here.
     return const NewsView();
   }
 }

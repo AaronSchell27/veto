@@ -27,7 +27,6 @@ class App extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
-        // Remove the old theme class import reference and use Flutter's clean built-in styling
         theme: ThemeData(useMaterial3: true),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,

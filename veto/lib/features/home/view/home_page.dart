@@ -7,8 +7,6 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Your AppShell already hosts the BlocProvider! 
-    // Simply return the view layer directly here.
     return const HomeView(); 
   }
 }

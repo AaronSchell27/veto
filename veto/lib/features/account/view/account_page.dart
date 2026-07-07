@@ -7,7 +7,6 @@ class AccountPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // This is a plain Widget. Later, you'll wrap AccountView in a BlocProvider here.
     return const AccountView();
   }
 }

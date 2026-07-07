@@ -1,7 +1,7 @@
 // lib/features/app_shell/view/app_shell_view.dart
 import 'package:flutter/material.dart';
 import 'package:veto/features/account/account.dart';
-import 'package:veto/features/home/home.dart'; // Imports your curated content page
+import 'package:veto/features/home/home.dart';
 import 'package:veto/features/news/news.dart';
 import 'package:veto/features/settings/settings.dart';
 import 'package:veto/features/vote/vote.dart';
@@ -17,7 +17,7 @@ class _AppShellViewState extends State<AppShellView> {
   int _currentIndex = 0;
 
   late final List<Widget> _tabs = [
-    const HomePage(), // Clean, distinct feature page now injected here
+    const HomePage(),
     const VotePage(),
     const NewsPage(),
     const AccountPage(),

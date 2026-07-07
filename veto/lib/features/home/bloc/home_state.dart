@@ -1,7 +1,6 @@
 // lib/features/home/bloc/home_state.dart
 
 import 'package:equatable/equatable.dart';
-// Import your location models so the state can recognize Country and Region
 import 'package:veto/features/home/models/location_models.dart';
 
 final class HomeState extends Equatable {
@@ -18,11 +17,9 @@ final class HomeState extends Equatable {
   final bool isDarkMode;
   final bool showLocationOnboarding;
   
-  // Lists holding the data loaded from the Bloc/Repository layer
   final List<Country> countries;
   final List<Region> availableRegions;
   
-  // Selections made by the user
   final Country? selectedCountry;
   final Region? selectedRegion;
   final String cityInput;
@@ -38,7 +35,6 @@ HomeState copyWith({
   Country? selectedCountry,
   Region? selectedRegion,
   String? cityInput,
-  // Add explicit clear triggers to cleanly bypass the linter rules
   bool clearSelectedRegion = false,
 }) {
   return HomeState(

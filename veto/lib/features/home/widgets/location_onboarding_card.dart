@@ -33,9 +33,7 @@ class LocationOnboardingCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
 
-                // Country Selector Dropdown
                 DropdownButtonFormField<Country>(
-                  // FIX: Migrated from 'value' to 'initialValue'
                   initialValue: state.selectedCountry,
                   hint: const Text('Select Country'),
                   items: state.countries.map((c) {
@@ -49,9 +47,7 @@ class LocationOnboardingCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
 
-                // Region Selector Dropdown
                 DropdownButtonFormField<Region>(
-                  // FIX: Migrated from 'value' to 'initialValue'
                   initialValue: state.selectedRegion,
                   hint: const Text('Select State / Region'),
                   items: state.availableRegions.map((r) {
@@ -67,7 +63,6 @@ class LocationOnboardingCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
 
-                // City Name Input Field
                 TextField(
                   decoration: const InputDecoration(
                     labelText: 'City',
@@ -80,7 +75,6 @@ class LocationOnboardingCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
 
-                // Submit Button
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(

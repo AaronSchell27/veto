@@ -23,8 +23,6 @@ class AppBlocObserver extends BlocObserver {
   }
 }
 
-/// Boots up the core application framework.
-/// Accepts the pre-initialized [SupabaseDatabaseClient] to inject down into the widget tree.
 Future<void> bootstrap({
   required SupabaseDatabaseClient databaseClient,
   required FutureOr<Widget> Function() builder,

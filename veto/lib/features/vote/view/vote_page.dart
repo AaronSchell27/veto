@@ -7,7 +7,6 @@ class VotePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // This is a plain Widget. Later, you'll wrap VoteView in a BlocProvider here.
     return const VoteView();
   }
 }

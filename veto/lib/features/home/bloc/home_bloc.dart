@@ -26,13 +26,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   ) async {
     try {
       final repoCountries = await _locationRepository.getCountries();
-      
-      // Map the repository models to your UI state models safely
+
       final uiCountries = repoCountries.map((c) => Country(id: c.id, name: c.name)).toList();
       
       emit(state.copyWith(countries: uiCountries));
     } on Exception catch (_) {
-      // Satisfies linter rule while safely preventing app crashes on network failures
     }
   }
 
@@ -40,7 +38,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     HomeCountryChanged event,
     Emitter<HomeState> emit,
   ) async {
-    // 1. Instantly select country, clear old region selection, and empty available regions list
     emit(
       state.copyWith(
         selectedCountry: event.country,
@@ -49,14 +46,12 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       ),
     );
 
-    // 2. Fetch regions belonging to this specific country
     try {
       final repoRegions = await _locationRepository.getRegionsByCountry(event.country.id);
       final uiRegions = repoRegions.map((r) => Region(id: r.id, name: r.name, countryId: r.countryId)).toList();
       
       emit(state.copyWith(availableRegions: uiRegions));
     } on Exception catch (_) {
-      // Handle gracefully
     }
   }
 
@@ -81,10 +76,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         cityName: state.cityInput,
       );
       
-      // Once saved to your accounts schema, close the onboarding card panel view!
       emit(state.copyWith(showLocationOnboarding: false));
     } on Exception catch (_) {
-      // Handle gracefully
     }
   }
 }

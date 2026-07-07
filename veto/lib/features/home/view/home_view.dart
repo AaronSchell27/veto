@@ -7,14 +7,11 @@ class HomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Remove the Scaffold and BottomNavigationBar entirely here!
-    // 2. Use a SingleChildScrollView or custom layout body so it fills the screen safely inside the AppShell.
     return const Scaffold(
       body: SingleChildScrollView(
         child: Column(
           children: [
             LocationOnboardingCard(),
-            // Your other home feed components go below here safely
           ],
         ),
       ),
