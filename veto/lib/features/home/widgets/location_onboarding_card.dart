@@ -8,24 +8,11 @@ import 'package:veto/features/home/models/location_models.dart';
 class LocationOnboardingCard extends StatelessWidget {
   const LocationOnboardingCard({super.key});
 
-  // Mocked localized lists — in a full VGV app, these are fetched via a repository
-  static const _countries = [Country(id: 'US', name: 'United States')];
-  static const _regions = [
-    Region(id: 'AZ', countryId: 'US', name: 'Arizona'),
-    Region(id: 'CA', countryId: 'US', name: 'California'),
-    Region(id: 'NY', countryId: 'US', name: 'New York'),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<HomeBloc, HomeState>(
       builder: (context, state) {
         if (!state.showLocationOnboarding) return const SizedBox.shrink();
-
-        // Filter regions matching the selected country
-        final availableRegions = _regions
-            .where((r) => r.countryId == state.selectedCountry?.id)
-            .toList();
 
         return Card(
           margin: const EdgeInsets.all(16),
@@ -48,31 +35,33 @@ class LocationOnboardingCard extends StatelessWidget {
 
                 // Country Selector Dropdown
                 DropdownButtonFormField<Country>(
+                  // FIX: Migrated from 'value' to 'initialValue'
                   initialValue: state.selectedCountry,
                   hint: const Text('Select Country'),
-                  items: _countries.map((c) {
+                  items: state.countries.map((c) {
                     return DropdownMenuItem(value: c, child: Text(c.name));
                   }).toList(),
                   onChanged: (country) {
                     if (country != null) {
-                      context.read<HomeBloc>().add(LocationCountryChanged(country));
+                      context.read<HomeBloc>().add(HomeCountryChanged(country));
                     }
                   },
                 ),
                 const SizedBox(height: 12),
 
-                // Region Selector Dropdown (Enabled only when country is selected)
+                // Region Selector Dropdown
                 DropdownButtonFormField<Region>(
+                  // FIX: Migrated from 'value' to 'initialValue'
                   initialValue: state.selectedRegion,
                   hint: const Text('Select State / Region'),
-                  items: availableRegions.map((r) {
+                  items: state.availableRegions.map((r) {
                     return DropdownMenuItem(value: r, child: Text(r.name));
                   }).toList(),
                   onChanged: state.selectedCountry == null
                       ? null
                       : (region) {
                           if (region != null) {
-                            context.read<HomeBloc>().add(LocationRegionChanged(region));
+                            context.read<HomeBloc>().add(HomeRegionChanged(region));
                           }
                         },
                 ),
@@ -86,7 +75,7 @@ class LocationOnboardingCard extends StatelessWidget {
                   ),
                   enabled: state.selectedRegion != null,
                   onChanged: (city) {
-                    context.read<HomeBloc>().add(LocationCityChanged(city));
+                    context.read<HomeBloc>().add(HomeCityInputChanged(city));
                   },
                 ),
                 const SizedBox(height: 20),
@@ -96,7 +85,7 @@ class LocationOnboardingCard extends StatelessWidget {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: state.isLocationFormValid
-                        ? () => context.read<HomeBloc>().add(const LocationFormSubmitted())
+                        ? () => context.read<HomeBloc>().add(const HomeLocationSubmitted())
                         : null,
                     child: const Text('Confirm Location'),
                   ),

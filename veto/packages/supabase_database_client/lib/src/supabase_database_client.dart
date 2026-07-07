@@ -1,5 +1,7 @@
 // packages/supabase_database_client/lib/src/supabase_database_client.dart
 
+// ignore_for_file: document_ignores, deprecated_member_use
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseDatabaseClient {

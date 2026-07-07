@@ -10,40 +10,34 @@ sealed class HomeEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-// Existing theme event
-class ToggleThemeEvent extends HomeEvent {
-  const ToggleThemeEvent();
+class HomeCountriesRequested extends HomeEvent {
+  const HomeCountriesRequested();
 }
 
-// This is the missing event! Trigger this when the home page loads.
-class LocationOnboardingInitialized extends HomeEvent {
-  const LocationOnboardingInitialized();
-}
-
-class LocationCountryChanged extends HomeEvent {
-  const LocationCountryChanged(this.country);
+class HomeCountryChanged extends HomeEvent {
+  const HomeCountryChanged(this.country);
   final Country country;
 
   @override
   List<Object?> get props => [country];
 }
 
-class LocationRegionChanged extends HomeEvent {
-  const LocationRegionChanged(this.region);
+class HomeRegionChanged extends HomeEvent {
+  const HomeRegionChanged(this.region);
   final Region region;
 
   @override
   List<Object?> get props => [region];
 }
 
-class LocationCityChanged extends HomeEvent {
-  const LocationCityChanged(this.city);
-  final String city;
+class HomeCityInputChanged extends HomeEvent {
+  const HomeCityInputChanged(this.cityInput);
+  final String cityInput;
 
   @override
-  List<Object?> get props => [city];
+  List<Object?> get props => [cityInput];
 }
 
-class LocationFormSubmitted extends HomeEvent {
-  const LocationFormSubmitted();
+class HomeLocationSubmitted extends HomeEvent {
+  const HomeLocationSubmitted();
 }

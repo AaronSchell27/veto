@@ -1,0 +1,13 @@
+name: location_repository
+description: A local repository package for handling location operations and accounts.
+version: 0.0.1
+publish_to: 'none'
+
+environment:
+  sdk: '^3.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  supabase_database_client:
+    path: ../supabase_database_client

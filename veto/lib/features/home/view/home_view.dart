@@ -1,78 +1,22 @@
 // lib/features/home/view/home_view.dart
 import 'package:flutter/material.dart';
-import 'package:veto/features/account/account.dart';
-import 'package:veto/features/news/news.dart';
-import 'package:veto/features/settings/settings.dart';
-import 'package:veto/features/vote/vote.dart';
+import 'package:veto/features/home/widgets/location_onboarding_card.dart';
 
-class HomeView extends StatefulWidget {
+class HomeView extends StatelessWidget {
   const HomeView({super.key});
 
   @override
-  State<HomeView> createState() => _HomeViewState();
-}
-
-class _HomeViewState extends State<HomeView> {
-  int _currentIndex = 0;
-
-  late final List<Widget> _tabs = [
-    const HomeFeedContent(), // 1. Your curated content page goes here!
-    const VotePage(),
-    const NewsPage(),
-    const AccountPage(),
-    const SettingsPage(),
-  ];
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _tabs,
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        type: BottomNavigationBarType.fixed,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.how_to_vote), label: 'Vote'),
-          BottomNavigationBarItem(icon: Icon(Icons.newspaper), label: 'News'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Account'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
-        ],
-      ),
-    );
-  }
-}
-
-// 2. This is the actual aggregated content "page" widget for your first tab.
-// Notice it has NO Scaffold or bottom navigation bar of its own.
-class HomeFeedContent extends StatelessWidget {
-  const HomeFeedContent({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Text(
-            'Curated Feed',
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
-          const SizedBox(height: 16),
-          const Card(
-            child: ListTile(
-              title: Text('Aggregated Content Example'),
-              subtitle: Text('Your news, voting updates, etc. merge here.'),
-            ),
-          ),
-        ],
+    // 1. Remove the Scaffold and BottomNavigationBar entirely here!
+    // 2. Use a SingleChildScrollView or custom layout body so it fills the screen safely inside the AppShell.
+    return const Scaffold(
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            LocationOnboardingCard(),
+            // Your other home feed components go below here safely
+          ],
+        ),
       ),
     );
   }

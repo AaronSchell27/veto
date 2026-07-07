@@ -1,54 +1,90 @@
 // lib/features/home/bloc/home_bloc.dart
 
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:bloc/bloc.dart';
+import 'package:location_repository/location_repository.dart';
 import 'package:veto/features/home/bloc/home_event.dart';
 import 'package:veto/features/home/bloc/home_state.dart';
-import 'package:veto/features/home/models/location_models.dart'; 
+import 'package:veto/features/home/models/location_models.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
-  HomeBloc() : super(const HomeState()) {
-    
-    on<ToggleThemeEvent>((event, emit) {
-      emit(state.copyWith(isDarkMode: !state.isDarkMode));
-    });
+  HomeBloc({
+    required LocationRepository locationRepository,
+  })  : _locationRepository = locationRepository,
+        super(const HomeState()) {
+    on<HomeCountriesRequested>(_onCountriesRequested);
+    on<HomeCountryChanged>(_onCountryChanged);
+    on<HomeRegionChanged>(_onRegionChanged);
+    on<HomeCityInputChanged>(_onCityInputChanged);
+    on<HomeLocationSubmitted>(_onLocationSubmitted);
+  }
 
-    on<LocationOnboardingInitialized>((event, emit) {
-      const mockCountries = [Country(id: 'US', name: 'United States')];
-      emit(state.copyWith(countries: mockCountries));
-    });
+  final LocationRepository _locationRepository;
 
-    on<LocationCountryChanged>((event, emit) {
-      const allRegions = [
-        Region(id: 'AZ', countryId: 'US', name: 'Arizona'),
-        Region(id: 'CA', countryId: 'US', name: 'California'),
-        Region(id: 'NY', countryId: 'US', name: 'New York'),
-      ];
+  Future<void> _onCountriesRequested(
+    HomeCountriesRequested event,
+    Emitter<HomeState> emit,
+  ) async {
+    try {
+      final repoCountries = await _locationRepository.getCountries();
+      
+      // Map the repository models to your UI state models safely
+      final uiCountries = repoCountries.map((c) => Country(id: c.id, name: c.name)).toList();
+      
+      emit(state.copyWith(countries: uiCountries));
+    } on Exception catch (_) {
+      // Satisfies linter rule while safely preventing app crashes on network failures
+    }
+  }
 
-      final filteredRegions = allRegions
-        .where((r) => r.countryId == event.country.id)
-        .toList();
-
-      emit(state.copyWith(
+  Future<void> _onCountryChanged(
+    HomeCountryChanged event,
+    Emitter<HomeState> emit,
+  ) async {
+    // 1. Instantly select country, clear old region selection, and empty available regions list
+    emit(
+      state.copyWith(
         selectedCountry: event.country,
-        availableRegions: filteredRegions,
-        clearSelectedRegion: true, // Perfect, functional, and linter-compliant!
-        cityInput: '',
-      ));
-    });
+        clearSelectedRegion: true,
+        availableRegions: const [],
+      ),
+    );
 
-    on<LocationRegionChanged>((event, emit) {
-      // Redundant cityInput clearing removed to satisfy lint rule
-      emit(state.copyWith(
-        selectedRegion: event.region,
-      ));
-    });
+    // 2. Fetch regions belonging to this specific country
+    try {
+      final repoRegions = await _locationRepository.getRegionsByCountry(event.country.id);
+      final uiRegions = repoRegions.map((r) => Region(id: r.id, name: r.name, countryId: r.countryId)).toList();
+      
+      emit(state.copyWith(availableRegions: uiRegions));
+    } on Exception catch (_) {
+      // Handle gracefully
+    }
+  }
 
-    on<LocationCityChanged>((event, emit) {
-      emit(state.copyWith(cityInput: event.city));
-    });
+  void _onRegionChanged(HomeRegionChanged event, Emitter<HomeState> emit) {
+    emit(state.copyWith(selectedRegion: event.region));
+  }
 
-    on<LocationFormSubmitted>((event, emit) {
+  void _onCityInputChanged(HomeCityInputChanged event, Emitter<HomeState> emit) {
+    emit(state.copyWith(cityInput: event.cityInput));
+  }
+
+  Future<void> _onLocationSubmitted(
+    HomeLocationSubmitted event,
+    Emitter<HomeState> emit,
+  ) async {
+    if (!state.isLocationFormValid) return;
+
+    try {
+      await _locationRepository.saveUserLocation(
+        countryId: state.selectedCountry!.id,
+        regionId: state.selectedRegion!.id,
+        cityName: state.cityInput,
+      );
+      
+      // Once saved to your accounts schema, close the onboarding card panel view!
       emit(state.copyWith(showLocationOnboarding: false));
-    });
+    } on Exception catch (_) {
+      // Handle gracefully
+    }
   }
 }

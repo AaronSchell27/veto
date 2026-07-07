@@ -2,32 +2,36 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:location_repository/location_repository.dart'; 
 import 'package:supabase_database_client/supabase_database_client.dart';
-import 'package:veto/features/home/view/home_page.dart';
+import 'package:veto/features/app_shell/view/app_shell.dart';
 import 'package:veto/l10n/l10n.dart';
 
 class App extends StatelessWidget {
   const App({
-    required this.databaseClient, // Added required dependency parameter
+    required SupabaseDatabaseClient databaseClient,
     super.key,
-  });
+  }) : _databaseClient = databaseClient;
 
-  final SupabaseDatabaseClient databaseClient; // Defined instance variable
+  final SupabaseDatabaseClient _databaseClient;
 
   @override
   Widget build(BuildContext context) {
-    return RepositoryProvider<SupabaseDatabaseClient>.value(
-      value: databaseClient,
-      child: MaterialApp(
-        theme: ThemeData(
-          appBarTheme: AppBarTheme(
-            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider.value(value: _databaseClient),
+        RepositoryProvider(
+          create: (context) => LocationRepository(
+            databaseClient: _databaseClient,
           ),
-          useMaterial3: true,
         ),
+      ],
+      child: MaterialApp(
+        // Remove the old theme class import reference and use Flutter's clean built-in styling
+        theme: ThemeData(useMaterial3: true),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: const HomePage(),
+        home: const AppShell(), 
       ),
     );
   }

@@ -16,6 +16,8 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: ^0.20.2
+  location_repository:
+    path: packages/location_repository
   supabase_database_client:
     path: packages/supabase_database_client
 

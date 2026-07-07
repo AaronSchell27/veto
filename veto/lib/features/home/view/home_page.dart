@@ -1,7 +1,5 @@
 // lib/features/home/view/home_page.dart
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:veto/features/home/bloc/home_bloc.dart';
 import 'package:veto/features/home/view/home_view.dart';
 
 class HomePage extends StatelessWidget {
@@ -9,9 +7,8 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => HomeBloc(),
-      child: const HomeView(), // This loads your persistent navigation layout
-    );
+    // Your AppShell already hosts the BlocProvider! 
+    // Simply return the view layer directly here.
+    return const HomeView(); 
   }
 }
