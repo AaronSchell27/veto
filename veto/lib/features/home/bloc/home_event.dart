@@ -41,3 +41,7 @@ class HomeCityInputChanged extends HomeEvent {
 class HomeLocationSubmitted extends HomeEvent {
   const HomeLocationSubmitted();
 }
+
+class HomeErrorDismissed extends HomeEvent {
+  const HomeErrorDismissed();
+}

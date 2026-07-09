@@ -1,5 +1,6 @@
 // packages/location_repository/lib/src/location_repository.dart
 
+import 'dart:developer' as developer;
 import 'package:supabase_database_client/supabase_database_client.dart';
 
 /// Clean domain model representing a Country from the database.
@@ -31,19 +32,30 @@ class LocationRepository {
 
   /// Fetches all available countries ordered alphabetically by name.
   Future<List<RepoCountry>> getCountries() async {
-    final List<dynamic> response = await _databaseClient.client
-        .from('countries')
-        .select('id, name')
-        .order('name');
+    try {
+      developer.log('=== [DEBUG] LocationRepository.getCountries() CALLED ===');
+      
+      final List<dynamic> response = await _databaseClient.client
+          .from('countries')
+          .select('id, name')
+          .order('name');
 
-    return response
-        .map(
-          (dynamic json) => RepoCountry(
-            id: (json as Map<String, dynamic>)['id'] as String,
-            name: json['name'] as String,
-          ),
-        )
-        .toList();
+      developer.log('=== [DEBUG] Supabase Raw Response: $response ===');
+
+      return response
+          .map(
+            (dynamic json) => RepoCountry(
+              id: (json as Map<String, dynamic>)['id'] as String,
+              name: json['name'] as String,
+            ),
+          )
+          .toList();
+    } catch (e, stack) {
+      developer.log('=== [DEBUG] Supabase getCountries FAILED ===');
+      developer.log('Error: $e');
+      developer.log('Stacktrace: $stack');
+      rethrow;
+    }
   }
 
   /// Fetches all regions belonging to a specific country ID.

@@ -34,6 +34,8 @@ class LocationOnboardingCard extends StatelessWidget {
                 const SizedBox(height: 16),
 
                 DropdownButtonFormField<Country>(
+                  // 🔥 This key tells Flutter to refresh the dropdown once the data arrives!
+                  key: ValueKey('country_dropdown_${state.countries.length}'), 
                   initialValue: state.selectedCountry,
                   hint: const Text('Select Country'),
                   items: state.countries.map((c) {
@@ -48,6 +50,8 @@ class LocationOnboardingCard extends StatelessWidget {
                 const SizedBox(height: 12),
 
                 DropdownButtonFormField<Region>(
+                  // 🔥 Refreshes the region dropdown when available regions change
+                  key: ValueKey('region_dropdown_${state.availableRegions.length}'), 
                   initialValue: state.selectedRegion,
                   hint: const Text('Select State / Region'),
                   items: state.availableRegions.map((r) {
