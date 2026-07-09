@@ -38,7 +38,7 @@ class LocationRepository {
       final List<dynamic> response = await _databaseClient.client
           .from('countries')
           .select('id, name')
-          .order('name');
+          .order('name', ascending: true);
 
       developer.log('=== [DEBUG] Supabase Raw Response: $response ===');
 
@@ -64,7 +64,7 @@ class LocationRepository {
         .from('regions')
         .select('id, name, country_id')
         .eq('country_id', countryId)
-        .order('name');
+        .order('name', ascending: true);
 
     return response
         .map(
