@@ -15,9 +15,11 @@ dependencies:
   flutter_bloc: ^9.1.1
   flutter_localizations:
     sdk: flutter
+  hydrated_bloc: ^11.0.0
   intl: ^0.20.2
   location_repository:
     path: packages/location_repository
+  path_provider: ^2.1.6
   supabase_database_client:
     path: packages/supabase_database_client
 

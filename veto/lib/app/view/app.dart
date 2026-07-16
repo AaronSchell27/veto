@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:location_repository/location_repository.dart'; 
 import 'package:supabase_database_client/supabase_database_client.dart';
 import 'package:veto/features/app_shell/view/app_shell.dart';
+import 'package:veto/features/settings/bloc/settings_bloc.dart';
 import 'package:veto/l10n/l10n.dart';
 
 class App extends StatelessWidget {
@@ -26,12 +27,44 @@ class App extends StatelessWidget {
           ),
         ),
       ],
-      child: MaterialApp(
-        theme: ThemeData(useMaterial3: true),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: const AppShell(), 
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) => SettingsBloc(),
+          ),
+          // Any future global blocs (like an AuthBloc) can go here too!
+        ],
+        child: const AppView(),
       ),
+    );
+  }
+}
+
+/// AppView is pulled out as a separate widget so it can safely read 
+/// the context of the newly created MultiBlocProvider above it.
+class AppView extends StatelessWidget {
+  const AppView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // Read the dark mode value from SettingsBloc to dynamically adjust the theme
+    final isDarkMode = context.select<SettingsBloc, bool>(
+      (bloc) => bloc.state.isDarkMode,
+    );
+
+    return MaterialApp(
+      theme: ThemeData(
+        useMaterial3: true,
+        brightness: Brightness.light,
+      ),
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        brightness: Brightness.dark,
+      ),
+      themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: const AppShell(),
     );
   }
 }

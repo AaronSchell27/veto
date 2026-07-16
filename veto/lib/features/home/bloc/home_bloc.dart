@@ -5,23 +5,26 @@ import 'package:location_repository/location_repository.dart';
 import 'package:veto/features/home/bloc/home_event.dart';
 import 'package:veto/features/home/bloc/home_state.dart';
 import 'package:veto/features/home/models/location_models.dart';
+import 'package:veto/features/settings/bloc/settings_bloc.dart'; // 1. Imported SettingsBloc
+import 'package:veto/features/settings/bloc/settings_event.dart'; // Imported UpdateLocationEvent
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   HomeBloc({
     required LocationRepository locationRepository,
+    required SettingsBloc settingsBloc, // 2. Added settingsBloc constructor parameter
   })  : _locationRepository = locationRepository,
+        _settingsBloc = settingsBloc, // Initialized private variable
         super(const HomeState()) {
     on<HomeCountriesRequested>(_onCountriesRequested);
     on<HomeCountryChanged>(_onCountryChanged);
     on<HomeRegionChanged>(_onRegionChanged);
     on<HomeCityInputChanged>(_onCityInputChanged);
     on<HomeLocationSubmitted>(_onLocationSubmitted);
-    
-    // Registers our new dismiss handler so the universal panel works!
     on<HomeErrorDismissed>(_onErrorDismissed);
   }
 
   final LocationRepository _locationRepository;
+  final SettingsBloc _settingsBloc; // 3. Added private class field
 
   Future<void> _onCountriesRequested(
     HomeCountriesRequested event,
@@ -93,6 +96,15 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         countryId: state.selectedCountry!.id,
         regionId: state.selectedRegion!.id,
         cityName: state.cityInput,
+      );
+
+      // 4. Synchronize the newly captured state over to your hydrated settings bloc!
+      _settingsBloc.add(
+        UpdateLocationEvent(
+          countryId: state.selectedCountry!.id,
+          regionId: state.selectedRegion!.id,
+          cityName: state.cityInput,
+        ),
       );
       
       emit(state.copyWith(

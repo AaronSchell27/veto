@@ -1,6 +1,5 @@
+// lib/features/settings/view/settings_page.dart
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:veto/features/settings/bloc/settings_bloc.dart';
 import 'package:veto/features/settings/view/settings_view.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -8,9 +7,7 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => SettingsBloc(),
-      child: const SettingsView(), 
-    );
+    // No BlocProvider here anymore! It's globally provided at the root.
+    return const SettingsView(); 
   }
 }
