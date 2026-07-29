@@ -8,7 +8,11 @@ import 'package:veto/features/app_shell/view/app_shell.dart';
 import 'package:veto/features/settings/bloc/settings_bloc.dart';
 import 'package:veto/l10n/l10n.dart';
 
+/// {@template app}
+/// Root application widget responsible for top-level repository and BLoC provision.
+/// {@endtemplate}
 class App extends StatelessWidget {
+  /// {@macro app}
   const App({
     required SupabaseDatabaseClient databaseClient,
     super.key,
@@ -30,7 +34,9 @@ class App extends StatelessWidget {
       child: MultiBlocProvider(
         providers: [
           BlocProvider(
-            create: (context) => SettingsBloc(),
+            create: (context) => SettingsBloc(
+              locationRepository: context.read<LocationRepository>(),
+            ),
           ),
           // Any future global blocs (like an AuthBloc) can go here too!
         ],

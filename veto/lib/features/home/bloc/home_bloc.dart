@@ -11,9 +11,9 @@ import 'package:veto/features/settings/bloc/settings_event.dart'; // Imported Up
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   HomeBloc({
     required LocationRepository locationRepository,
-    required SettingsBloc settingsBloc, // 2. Added settingsBloc constructor parameter
+    required SettingsBloc settingsBloc,
   })  : _locationRepository = locationRepository,
-        _settingsBloc = settingsBloc, // Initialized private variable
+        _settingsBloc = settingsBloc,
         super(const HomeState()) {
     on<HomeCountriesRequested>(_onCountriesRequested);
     on<HomeCountryChanged>(_onCountryChanged);
@@ -21,6 +21,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<HomeCityInputChanged>(_onCityInputChanged);
     on<HomeLocationSubmitted>(_onLocationSubmitted);
     on<HomeErrorDismissed>(_onErrorDismissed);
+    on<HomeLocationReset>(_onLocationReset); // <-- Add handler
   }
 
   final LocationRepository _locationRepository;
@@ -123,6 +124,13 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     emit(state.copyWith(
       status: HomeStatus.success,
       clearErrorMessage: true,
+    ));
+  }
+
+  void _onLocationReset(HomeLocationReset event, Emitter<HomeState> emit) {
+    emit(state.copyWith(
+      showLocationOnboarding: true,
+      status: HomeStatus.initial,
     ));
   }
 }

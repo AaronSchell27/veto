@@ -1,14 +1,21 @@
 // lib/features/settings/view/settings_view.dart
-import 'dart:async'; // Required for unawaited
+
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:veto/features/home/bloc/home_bloc.dart';
-import 'package:veto/features/home/widgets/location_onboarding_card.dart'; // Corrected folder path!
+import 'package:veto/features/home/bloc/home_event.dart';
+import 'package:veto/features/home/bloc/home_state.dart';
+import 'package:veto/features/home/widgets/location_onboarding_card.dart';
 import 'package:veto/features/settings/bloc/settings_bloc.dart';
 import 'package:veto/features/settings/bloc/settings_state.dart';
 import 'package:veto/features/settings/widgets/dark_mode_switch.dart';
 
+/// {@template settings_view}
+/// Displays app settings and allows updating dark mode and location preferences.
+/// {@endtemplate}
 class SettingsView extends StatelessWidget {
+  /// {@macro settings_view}
   const SettingsView({super.key});
 
   @override
@@ -43,8 +50,13 @@ class SettingsView extends StatelessWidget {
                 leading: Icon(iconData, color: iconColor),
                 title: const Text('Local Location'),
                 subtitle: Text(subtitleText),
-                trailing: const Icon(Icons.chevron_right),
+                trailing: const Icon(Icons.edit_location_alt_outlined),
                 onTap: () {
+                  // Cascade operator fixes the lint warning
+                  context.read<HomeBloc>()
+                    ..add(const HomeLocationReset())
+                    ..add(const HomeCountriesRequested());
+
                   unawaited(
                     showDialog<void>(
                       context: context,
@@ -52,9 +64,21 @@ class SettingsView extends StatelessWidget {
                         return Dialog(
                           insetPadding: const EdgeInsets.all(16),
                           child: SingleChildScrollView(
-                            child: BlocProvider.value(
-                              value: context.read<HomeBloc>(),
-                              child: const LocationOnboardingCard(),
+                            child: MultiBlocProvider(
+                              providers: [
+                                BlocProvider.value(
+                                  value: context.read<HomeBloc>(),
+                                ),
+                              ],
+                              child: BlocListener<HomeBloc, HomeState>(
+                                listenWhen: (prev, curr) =>
+                                    prev.showLocationOnboarding &&
+                                    !curr.showLocationOnboarding,
+                                listener: (context, state) {
+                                  Navigator.of(dialogContext).pop();
+                                },
+                                child: const LocationOnboardingCard(),
+                              ),
                             ),
                           ),
                         );

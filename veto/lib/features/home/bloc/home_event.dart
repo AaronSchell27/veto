@@ -45,3 +45,7 @@ class HomeLocationSubmitted extends HomeEvent {
 class HomeErrorDismissed extends HomeEvent {
   const HomeErrorDismissed();
 }
+
+class HomeLocationReset extends HomeEvent {
+  const HomeLocationReset();
+}
