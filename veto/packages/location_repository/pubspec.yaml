@@ -9,5 +9,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  shared_preferences: ^2.2.2
   supabase_database_client:
     path: ../supabase_database_client
