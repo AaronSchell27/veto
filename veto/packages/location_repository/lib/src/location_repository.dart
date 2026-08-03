@@ -123,7 +123,7 @@ class LocationRepository {
 
     // Sync remotely only when a valid authenticated user exists
     if (isLoggedIn) {
-      // TODO(auth): Re-enable Supabase sync once login flow is completed.
+      // TODO(AaronSchell27): Re-enable Supabase sync once login flow is completed.
       // final user = _databaseClient.client.auth.currentUser;
       // if (user != null) {
       //   await _databaseClient.client.from('accounts').upsert({

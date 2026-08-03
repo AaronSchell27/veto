@@ -19,7 +19,6 @@ class SupabaseDatabaseClient {
   }) async {
     final supabase = await Supabase.initialize(
       url: url,
-      // Fallback to anonKey to match the cache expectation of version 2.12.4
       anonKey: anonKey, 
     );
     return SupabaseDatabaseClient(supabaseClient: supabase.client);
@@ -28,4 +27,25 @@ class SupabaseDatabaseClient {
   bool get isAuthenticated => _supabaseClient.auth.currentSession != null;
 
   User? get currentUser => _supabaseClient.auth.currentUser;
+
+  /// Fetches US national candidates (state_id IS NULL and city IS NULL)
+  /// from the `candidates` table.
+  Future<List<Map<String, dynamic>>> getUsNationalCandidates() async {
+    final response = await _supabaseClient
+        .from('candidates')
+        .select()
+        .eq('country_id', 'US')
+        .isFilter('state_id', null)
+        .isFilter('city', null);
+
+    return List<Map<String, dynamic>>.from(response);
+  }
+
+  /// Generates the public image URL for a file in a Supabase Storage bucket.
+  String getPublicStorageUrl({
+    required String bucketName,
+    required String path,
+  }) {
+    return _supabaseClient.storage.from(bucketName).getPublicUrl(path);
+  }
 }

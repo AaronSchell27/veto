@@ -2,30 +2,39 @@
 
 import 'package:bloc/bloc.dart';
 import 'package:location_repository/location_repository.dart';
+import 'package:supabase_database_client/supabase_database_client.dart';
+import 'package:veto/features/candidates/data/models/candidate_model.dart';
 import 'package:veto/features/home/bloc/home_event.dart';
 import 'package:veto/features/home/bloc/home_state.dart';
 import 'package:veto/features/home/models/location_models.dart';
-import 'package:veto/features/settings/bloc/settings_bloc.dart'; // 1. Imported SettingsBloc
-import 'package:veto/features/settings/bloc/settings_event.dart'; // Imported UpdateLocationEvent
+import 'package:veto/features/settings/bloc/settings_bloc.dart';
+import 'package:veto/features/settings/bloc/settings_event.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   HomeBloc({
     required LocationRepository locationRepository,
     required SettingsBloc settingsBloc,
+    required SupabaseDatabaseClient supabaseDatabaseClient,
+    String candidateBucketName = 'candidate-photos',
   })  : _locationRepository = locationRepository,
         _settingsBloc = settingsBloc,
+        _supabaseDatabaseClient = supabaseDatabaseClient,
+        _candidateBucketName = candidateBucketName,
         super(const HomeState()) {
     on<HomeCountriesRequested>(_onCountriesRequested);
     on<HomeCountryChanged>(_onCountryChanged);
     on<HomeRegionChanged>(_onRegionChanged);
     on<HomeCityInputChanged>(_onCityInputChanged);
     on<HomeLocationSubmitted>(_onLocationSubmitted);
+    on<HomeCandidatesRequested>(_onCandidatesRequested);
     on<HomeErrorDismissed>(_onErrorDismissed);
-    on<HomeLocationReset>(_onLocationReset); // <-- Add handler
+    on<HomeLocationReset>(_onLocationReset);
   }
 
   final LocationRepository _locationRepository;
-  final SettingsBloc _settingsBloc; // 3. Added private class field
+  final SettingsBloc _settingsBloc;
+  final SupabaseDatabaseClient _supabaseDatabaseClient;
+  final String _candidateBucketName;
 
   Future<void> _onCountriesRequested(
     HomeCountriesRequested event,
@@ -69,6 +78,12 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         status: HomeStatus.success,
         availableRegions: uiRegions,
       ));
+
+      if (state.isUSLocation) {
+        add(const HomeCandidatesRequested());
+      } else {
+        emit(state.copyWith(candidates: const []));
+      }
     } on Exception catch (error) {
       emit(state.copyWith(
         status: HomeStatus.failure,
@@ -99,7 +114,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         cityName: state.cityInput,
       );
 
-      // 4. Synchronize the newly captured state over to your hydrated settings bloc!
       _settingsBloc.add(
         UpdateLocationEvent(
           countryId: state.selectedCountry!.id,
@@ -107,11 +121,49 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           cityName: state.cityInput,
         ),
       );
+
+      if (state.isUSLocation) {
+        add(const HomeCandidatesRequested());
+      }
       
       emit(state.copyWith(
         status: HomeStatus.success,
         showLocationOnboarding: false,
       ));
+    } on Exception catch (error) {
+      emit(state.copyWith(
+        status: HomeStatus.failure,
+        errorMessage: error.toString(),
+      ));
+    }
+  }
+
+  Future<void> _onCandidatesRequested(
+    HomeCandidatesRequested event,
+    Emitter<HomeState> emit,
+  ) async {
+    try {
+      final rawCandidates = await _supabaseDatabaseClient.getUsNationalCandidates();
+
+      final candidates = rawCandidates.map((json) {
+        final rawPath = json['picture_url'] as String? ?? json['photo_url'] as String?;
+        String? fullPhotoUrl;
+
+        if (rawPath != null && rawPath.isNotEmpty) {
+          fullPhotoUrl = rawPath.startsWith('http')
+              ? rawPath
+              : _supabaseDatabaseClient.getPublicStorageUrl(
+                  bucketName: _candidateBucketName,
+                  path: rawPath,
+                );
+        }
+
+        return Candidate.fromJson(
+          json,
+        ).copyWithPhotoUrl(fullPhotoUrl);
+      }).toList();
+
+      emit(state.copyWith(candidates: candidates));
     } on Exception catch (error) {
       emit(state.copyWith(
         status: HomeStatus.failure,
@@ -131,6 +183,23 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     emit(state.copyWith(
       showLocationOnboarding: true,
       status: HomeStatus.initial,
+      candidates: const [],
     ));
+  }
+}
+
+extension on Candidate {
+  Candidate copyWithPhotoUrl(String? photoUrl) {
+    return Candidate(
+      id: id,
+      firstName: firstName,
+      lastName: lastName,
+      countryId: countryId,
+      stateId: stateId,
+      city: city,
+      party: party,
+      role: role,
+      photoUrl: photoUrl ?? this.photoUrl,
+    );
   }
 }

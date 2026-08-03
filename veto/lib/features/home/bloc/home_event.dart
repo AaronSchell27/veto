@@ -42,6 +42,10 @@ class HomeLocationSubmitted extends HomeEvent {
   const HomeLocationSubmitted();
 }
 
+class HomeCandidatesRequested extends HomeEvent {
+  const HomeCandidatesRequested();
+}
+
 class HomeErrorDismissed extends HomeEvent {
   const HomeErrorDismissed();
 }

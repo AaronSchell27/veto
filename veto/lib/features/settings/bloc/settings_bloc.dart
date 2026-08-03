@@ -1,3 +1,5 @@
+// lib/features/settings/bloc/settings_bloc.dart
+
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:location_repository/location_repository.dart';
 import 'package:veto/features/settings/bloc/settings_event.dart';
