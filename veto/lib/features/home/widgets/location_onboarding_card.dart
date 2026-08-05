@@ -1,3 +1,5 @@
+// lib/features/home/widgets/location_onboarding_card.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:veto/features/home/bloc/home_bloc.dart';

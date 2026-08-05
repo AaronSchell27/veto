@@ -2,6 +2,7 @@
 
 import 'package:equatable/equatable.dart';
 import 'package:veto/features/candidates/data/models/candidate_model.dart';
+import 'package:veto/features/home/bloc/home_event.dart';
 import 'package:veto/features/home/models/location_models.dart';
 
 enum HomeStatus { initial, loading, success, failure }
@@ -12,6 +13,9 @@ final class HomeState extends Equatable {
     this.errorMessage,
     this.isDarkMode = false,
     this.showLocationOnboarding = true,
+    this.hasSubmittedLocation = false,
+    this.isFetchingCandidates = false,
+    this.selectedElectionTier,
     this.countries = const [],
     this.availableRegions = const [],
     this.selectedCountry,
@@ -24,6 +28,9 @@ final class HomeState extends Equatable {
   final String? errorMessage;
   final bool isDarkMode;
   final bool showLocationOnboarding;
+  final bool hasSubmittedLocation;
+  final bool isFetchingCandidates;
+  final ElectionTier? selectedElectionTier;
   
   final List<Country> countries;
   final List<Region> availableRegions;
@@ -54,6 +61,10 @@ final class HomeState extends Equatable {
     String? errorMessage,
     bool? isDarkMode,
     bool? showLocationOnboarding,
+    bool? hasSubmittedLocation,
+    bool? isFetchingCandidates,
+    ElectionTier? selectedElectionTier,
+    bool clearSelectedElectionTier = false,
     List<Country>? countries,
     List<Region>? availableRegions,
     Country? selectedCountry,
@@ -68,6 +79,11 @@ final class HomeState extends Equatable {
       errorMessage: clearErrorMessage ? null : (errorMessage ?? this.errorMessage),
       isDarkMode: isDarkMode ?? this.isDarkMode,
       showLocationOnboarding: showLocationOnboarding ?? this.showLocationOnboarding,
+      hasSubmittedLocation: hasSubmittedLocation ?? this.hasSubmittedLocation,
+      isFetchingCandidates: isFetchingCandidates ?? this.isFetchingCandidates,
+      selectedElectionTier: clearSelectedElectionTier
+          ? null
+          : (selectedElectionTier ?? this.selectedElectionTier),
       countries: countries ?? this.countries,
       availableRegions: availableRegions ?? this.availableRegions,
       selectedCountry: selectedCountry ?? this.selectedCountry,
@@ -83,6 +99,9 @@ final class HomeState extends Equatable {
         errorMessage,
         isDarkMode,
         showLocationOnboarding,
+        hasSubmittedLocation,
+        isFetchingCandidates,
+        selectedElectionTier,
         countries,
         availableRegions,
         selectedCountry,

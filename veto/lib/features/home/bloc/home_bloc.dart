@@ -26,6 +26,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<HomeRegionChanged>(_onRegionChanged);
     on<HomeCityInputChanged>(_onCityInputChanged);
     on<HomeLocationSubmitted>(_onLocationSubmitted);
+    on<HomeElectionTierChanged>(_onElectionTierChanged);
     on<HomeCandidatesRequested>(_onCandidatesRequested);
     on<HomeErrorDismissed>(_onErrorDismissed);
     on<HomeLocationReset>(_onLocationReset);
@@ -77,13 +78,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       emit(state.copyWith(
         status: HomeStatus.success,
         availableRegions: uiRegions,
+        candidates: const [],
       ));
-
-      if (state.isUSLocation) {
-        add(const HomeCandidatesRequested());
-      } else {
-        emit(state.copyWith(candidates: const []));
-      }
     } on Exception catch (error) {
       emit(state.copyWith(
         status: HomeStatus.failure,
@@ -122,13 +118,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         ),
       );
 
-      if (state.isUSLocation) {
-        add(const HomeCandidatesRequested());
-      }
-      
       emit(state.copyWith(
         status: HomeStatus.success,
         showLocationOnboarding: false,
+        hasSubmittedLocation: true,
+        clearSelectedElectionTier: true,
       ));
     } on Exception catch (error) {
       emit(state.copyWith(
@@ -138,10 +132,23 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     }
   }
 
+  Future<void> _onElectionTierChanged(
+    HomeElectionTierChanged event,
+    Emitter<HomeState> emit,
+  ) async {
+    emit(state.copyWith(selectedElectionTier: event.tier));
+    if (state.isUSLocation && event.tier == ElectionTier.federal) {
+      add(const HomeCandidatesRequested());
+    } else {
+      emit(state.copyWith(candidates: const []));
+    }
+  }
+
   Future<void> _onCandidatesRequested(
     HomeCandidatesRequested event,
     Emitter<HomeState> emit,
   ) async {
+    emit(state.copyWith(isFetchingCandidates: true));
     try {
       final rawCandidates = await _supabaseDatabaseClient.getUsNationalCandidates();
 
@@ -163,11 +170,15 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         ).copyWithPhotoUrl(fullPhotoUrl);
       }).toList();
 
-      emit(state.copyWith(candidates: candidates));
+      emit(state.copyWith(
+        candidates: candidates,
+        isFetchingCandidates: false,
+      ));
     } on Exception catch (error) {
       emit(state.copyWith(
         status: HomeStatus.failure,
         errorMessage: error.toString(),
+        isFetchingCandidates: false,
       ));
     }
   }
@@ -182,8 +193,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   void _onLocationReset(HomeLocationReset event, Emitter<HomeState> emit) {
     emit(state.copyWith(
       showLocationOnboarding: true,
+      hasSubmittedLocation: false,
       status: HomeStatus.initial,
       candidates: const [],
+      isFetchingCandidates: false,
+      clearSelectedElectionTier: true,
     ));
   }
 }
