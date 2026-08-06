@@ -1,19 +1,25 @@
 // lib/features/home/widgets/local_events_card.dart
 
 import 'package:flutter/material.dart';
+import 'package:veto/features/events/data/models/event_model.dart';
+import 'package:veto/features/home/widgets/event_tile.dart';
 
 /// Card component displaying a scrollable list of local events matching the visual style of `ElectionsAccordion`.
 class LocalEventsCard extends StatelessWidget {
   const LocalEventsCard({
     super.key,
     this.events = const [],
+    this.isLoading = false,
   });
 
   /// List of event items to display.
-  final List<Widget> events;
+  final List<Event> events;
+
+  /// Whether the events are currently being fetched.
+  final bool isLoading;
 
   /// Approximate height allowed for up to 3 event cards before internal scrolling kicks in.
-  static const double _maxViewportHeight = 240;
+  static const double _maxViewportHeight = 280;
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +55,14 @@ class LocalEventsCard extends StatelessWidget {
               color: theme.colorScheme.outlineVariant,
             ),
             const SizedBox(height: 4),
-            if (events.isEmpty)
+            if (isLoading)
+              const Padding(
+                padding: EdgeInsets.all(24),
+                child: Center(
+                  child: CircularProgressIndicator(strokeWidth: 2.5),
+                ),
+              )
+            else if (events.isEmpty)
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Text(
@@ -70,7 +83,7 @@ class LocalEventsCard extends StatelessWidget {
                     shrinkWrap: true,
                     itemCount: events.length,
                     separatorBuilder: (context, index) => const SizedBox(height: 8),
-                    itemBuilder: (context, index) => events[index],
+                    itemBuilder: (context, index) => EventTile(event: events[index]),
                   ),
                 ),
               ),
