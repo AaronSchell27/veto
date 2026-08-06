@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:veto/features/home/bloc/home_bloc.dart';
 import 'package:veto/features/home/bloc/home_state.dart';
 import 'package:veto/features/home/widgets/elections_accordion.dart';
+import 'package:veto/features/home/widgets/local_events_card.dart';
 import 'package:veto/features/home/widgets/location_onboarding_card.dart';
 
 class HomeView extends StatelessWidget {
@@ -20,8 +21,10 @@ class HomeView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const LocationOnboardingCard(),
-                if (state.hasSubmittedLocation && state.isUSLocation)
+                if (state.hasSubmittedLocation && state.isUSLocation) ...[
                   const ElectionsAccordion(),
+                  const LocalEventsCard(),
+                ],
               ],
             );
           },
