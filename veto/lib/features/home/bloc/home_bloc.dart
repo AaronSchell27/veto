@@ -137,7 +137,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     Emitter<HomeState> emit,
   ) async {
     emit(state.copyWith(selectedElectionTier: event.tier));
-    if (state.isUSLocation && event.tier == ElectionTier.federal) {
+    if (state.hasSubmittedLocation) {
       add(const HomeCandidatesRequested());
     } else {
       emit(state.copyWith(candidates: const []));
@@ -148,12 +148,18 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     HomeCandidatesRequested event,
     Emitter<HomeState> emit,
   ) async {
+    if (state.selectedElectionTier == null || state.selectedCountry == null) {
+      return;
+    }
+
     emit(state.copyWith(isFetchingCandidates: true));
     try {
-      final rawCandidates = await _supabaseDatabaseClient.getUsNationalCandidates();
+      final rawCandidates =
+          await _supabaseDatabaseClient.getUsNationalCandidates();
 
-      final candidates = rawCandidates.map((json) {
-        final rawPath = json['picture_url'] as String? ?? json['photo_url'] as String?;
+      final allCandidates = rawCandidates.map((json) {
+        final rawPath =
+            json['picture_url'] as String? ?? json['photo_url'] as String?;
         String? fullPhotoUrl;
 
         if (rawPath != null && rawPath.isNotEmpty) {
@@ -165,13 +171,42 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
                 );
         }
 
-        return Candidate.fromJson(
-          json,
-        ).copyWithPhotoUrl(fullPhotoUrl);
+        return Candidate.fromJson(json).copyWithPhotoUrl(fullPhotoUrl);
+      }).toList();
+
+      final userCountry = state.selectedCountry!.id.trim().toUpperCase();
+      final userRegion = state.selectedRegion?.id.trim().toUpperCase();
+      final userCity = state.cityInput.trim().toLowerCase();
+
+      final filteredCandidates = allCandidates.where((candidate) {
+        final cCountry = candidate.countryId.trim().toUpperCase();
+        final cState = candidate.stateId?.trim().toUpperCase();
+        final cCity = candidate.city?.trim().toLowerCase();
+
+        final hasState = cState != null && cState.isNotEmpty;
+        final hasCity = cCity != null && cCity.isNotEmpty;
+
+        switch (state.selectedElectionTier!) {
+          case ElectionTier.federal:
+            return cCountry == userCountry && !hasState && !hasCity;
+
+          case ElectionTier.state:
+            return cCountry == userCountry &&
+                hasState &&
+                (userRegion == null || cState == userRegion) &&
+                !hasCity;
+
+          case ElectionTier.local:
+            return cCountry == userCountry &&
+                hasState &&
+                (userRegion == null || cState == userRegion) &&
+                hasCity &&
+                cCity == userCity;
+        }
       }).toList();
 
       emit(state.copyWith(
-        candidates: candidates,
+        candidates: filteredCandidates,
         isFetchingCandidates: false,
       ));
     } on Exception catch (error) {

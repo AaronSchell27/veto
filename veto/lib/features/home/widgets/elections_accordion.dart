@@ -103,7 +103,7 @@ class ElectionsAccordion extends StatelessWidget {
           }
         },
         children: [
-          if (tier == ElectionTier.federal) ...[
+          if (isExpanded) ...[
             if (state.isFetchingCandidates)
               const Padding(
                 padding: EdgeInsets.all(24),
@@ -112,9 +112,9 @@ class ElectionsAccordion extends StatelessWidget {
                 ),
               )
             else if (state.candidates.isEmpty)
-              const Padding(
-                padding: EdgeInsets.all(16),
-                child: Text('No federal candidates found.'),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text('No $title candidates available for this region.'),
               )
             else
               ...state.candidates.map(
@@ -124,11 +124,6 @@ class ElectionsAccordion extends StatelessWidget {
                   pictureUrl: candidate.photoUrl,
                 ),
               ),
-          ] else ...[
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text('No $title candidates available for this region.'),
-            ),
           ],
         ],
       ),

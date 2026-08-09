@@ -28,15 +28,11 @@ class SupabaseDatabaseClient {
 
   User? get currentUser => _supabaseClient.auth.currentUser;
 
-  /// Fetches US national candidates (state_id IS NULL and city IS NULL)
-  /// from the `candidates` table.
+  /// Fetches all candidates from the `candidates` table.
   Future<List<Map<String, dynamic>>> getUsNationalCandidates() async {
     final response = await _supabaseClient
         .from('candidates')
-        .select()
-        .eq('country_id', 'US')
-        .isFilter('state_id', null)
-        .isFilter('city', null);
+        .select();
 
     return List<Map<String, dynamic>>.from(response);
   }
