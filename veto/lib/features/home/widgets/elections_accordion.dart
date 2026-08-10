@@ -2,13 +2,18 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:veto/features/candidates/data/models/candidate_model.dart';
 import 'package:veto/features/home/bloc/home_bloc.dart';
 import 'package:veto/features/home/bloc/home_event.dart';
 import 'package:veto/features/home/bloc/home_state.dart';
-import 'package:veto/features/home/widgets/presidential_candidate_card.dart';
+import 'package:veto/features/home/widgets/candidate_card.dart';
 
-/// Accordion menu displaying Local, State, and Federal election categories inside a distinct bordered container.
+/// {@template elections_accordion}
+/// Accordion menu displaying Local, State, and Federal election categories
+/// inside a distinct bordered container.
+/// {@endtemplate}
 class ElectionsAccordion extends StatelessWidget {
+  /// {@macro elections_accordion}
   const ElectionsAccordion({super.key});
 
   @override
@@ -37,8 +42,8 @@ class ElectionsAccordion extends StatelessWidget {
                   child: Text(
                     'Elections',
                     style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 Divider(
@@ -47,20 +52,17 @@ class ElectionsAccordion extends StatelessWidget {
                   color: theme.colorScheme.outlineVariant,
                 ),
                 const SizedBox(height: 4),
-                _buildAccordionTile(
-                  context: context,
+                _AccordionTile(
                   title: 'Local Elections',
                   tier: ElectionTier.local,
                   state: state,
                 ),
-                _buildAccordionTile(
-                  context: context,
+                _AccordionTile(
                   title: 'State Elections',
                   tier: ElectionTier.state,
                   state: state,
                 ),
-                _buildAccordionTile(
-                  context: context,
+                _AccordionTile(
                   title: 'Federal Elections',
                   tier: ElectionTier.federal,
                   state: state,
@@ -72,28 +74,37 @@ class ElectionsAccordion extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildAccordionTile({
-    required BuildContext context,
-    required String title,
-    required ElectionTier tier,
-    required HomeState state,
-  }) {
+class _AccordionTile extends StatelessWidget {
+  const _AccordionTile({
+    required this.title,
+    required this.tier,
+    required this.state,
+  });
+
+  final String title;
+  final ElectionTier tier;
+  final HomeState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final isExpanded = state.selectedElectionTier == tier;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       elevation: 0,
-      color: Theme.of(context).colorScheme.surfaceContainerLow,
+      color: theme.colorScheme.surfaceContainerLow,
       clipBehavior: Clip.antiAlias,
       child: ExpansionTile(
         key: Key('accordion_tile_${tier.name}_$isExpanded'),
         initiallyExpanded: isExpanded,
         title: Text(
           title,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
         ),
         onExpansionChanged: (expanded) {
           if (expanded) {
@@ -117,14 +128,103 @@ class ElectionsAccordion extends StatelessWidget {
                 child: Text('No $title candidates available for this region.'),
               )
             else
-              ...state.candidates.map(
-                (candidate) => PresidentialCandidateCard(
-                  name: candidate.fullName,
-                  party: candidate.party,
-                  pictureUrl: candidate.photoUrl,
-                ),
-              ),
+              _GroupedCandidatesList(candidates: state.candidates),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+class _GroupedCandidatesList extends StatelessWidget {
+  const _GroupedCandidatesList({
+    required this.candidates,
+  });
+
+  final List<Candidate> candidates;
+
+  @override
+  Widget build(BuildContext context) {
+    final groupedCandidates = candidates.fold<Map<String, List<Candidate>>>(
+      {},
+      (map, candidate) {
+        final positionTitle = candidate.role;
+        map.putIfAbsent(positionTitle, () => []).add(candidate);
+        return map;
+      },
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final entry in groupedCandidates.entries)
+          _PositionGroupCard(
+            positionTitle: entry.key,
+            candidates: entry.value,
+          ),
+      ],
+    );
+  }
+}
+
+class _PositionGroupCard extends StatelessWidget {
+  const _PositionGroupCard({
+    required this.positionTitle,
+    required this.candidates,
+  });
+
+  final String positionTitle;
+  final List<Candidate> candidates;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      elevation: 0,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: BorderSide(
+          color: theme.colorScheme.outlineVariant.withAlpha(180),
+        ),
+      ),
+      color: theme.colorScheme.surface,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            color: theme.colorScheme.primaryContainer.withAlpha(100),
+            child: Text(
+              positionTitle,
+              style: theme.textTheme.titleSmall?.copyWith(
+                color: theme.colorScheme.onPrimaryContainer,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.2,
+              ),
+            ),
+          ),
+          const Divider(height: 1, thickness: 1),
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: Column(
+              children: candidates
+                  .map(
+                    (candidate) => CandidateCard(
+                      name: candidate.fullName,
+                      party: candidate.party,
+                      pictureUrl: candidate.photoUrl,
+                      onTap: () {
+                        // TODO(candidate): Navigate to candidate detail page.
+                      },
+                    ),
+                  )
+                  .toList(),
+            ),
+          ),
         ],
       ),
     );

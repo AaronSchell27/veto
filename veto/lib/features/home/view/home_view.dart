@@ -1,5 +1,3 @@
-// lib/features/home/view/home_view.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:veto/features/home/bloc/home_bloc.dart';
@@ -8,7 +6,11 @@ import 'package:veto/features/home/widgets/elections_accordion.dart';
 import 'package:veto/features/home/widgets/local_events_card.dart';
 import 'package:veto/features/home/widgets/location_onboarding_card.dart';
 
+/// {@template home_view}
+/// Displays the main home screen content based on [HomeState].
+/// {@endtemplate}
 class HomeView extends StatelessWidget {
+  /// {@macro home_view}
   const HomeView({super.key});
 
   @override

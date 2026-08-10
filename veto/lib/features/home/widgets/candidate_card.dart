@@ -1,14 +1,14 @@
-// lib/features/home/widgets/presidential_candidate_card.dart
+// lib/features/home/widgets/candidate_card.dart
 
 import 'package:flutter/material.dart';
 
-/// {@template presidential_candidate_card}
-/// A card displaying a presidential candidate's overview information
-/// alongside a 1x1 aspect ratio avatar portrait.
+/// {@template candidate_card}
+/// A card displaying a candidate's overview information
+/// alongside a 1x1 aspect ratio avatar portrait and an external detail link icon.
 /// {@endtemplate}
-class PresidentialCandidateCard extends StatelessWidget {
-  /// {@macro presidential_candidate_card}
-  const PresidentialCandidateCard({
+class CandidateCard extends StatelessWidget {
+  /// {@macro candidate_card}
+  const CandidateCard({
     required this.name,
     required this.party,
     this.pictureUrl,
@@ -34,11 +34,21 @@ class PresidentialCandidateCard extends StatelessWidget {
 
     return Card(
       clipBehavior: Clip.antiAlias,
-      elevation: 1,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      elevation: 0,
+      color: theme.colorScheme.surfaceContainerLow,
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(
+          color: theme.colorScheme.outlineVariant.withAlpha(128),
+        ),
+      ),
       child: ListTile(
         onTap: onTap,
-        contentPadding: const EdgeInsets.all(12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 4,
+        ),
         leading: _CandidateAvatar(pictureUrl: pictureUrl),
         title: Text(
           name,
@@ -47,7 +57,7 @@ class PresidentialCandidateCard extends StatelessWidget {
           ),
         ),
         subtitle: Padding(
-          padding: const EdgeInsets.only(top: 4),
+          padding: const EdgeInsets.only(top: 2),
           child: Text(
             party,
             style: theme.textTheme.bodyMedium?.copyWith(
@@ -55,7 +65,11 @@ class PresidentialCandidateCard extends StatelessWidget {
             ),
           ),
         ),
-        trailing: const Icon(Icons.chevron_right),
+        trailing: Icon(
+          Icons.open_in_new_rounded,
+          size: 20,
+          color: theme.colorScheme.primary,
+        ),
       ),
     );
   }
@@ -69,7 +83,7 @@ class _CandidateAvatar extends StatelessWidget {
 
   final String? pictureUrl;
 
-  static const double _avatarSize = 56;
+  static const double _avatarSize = 48;
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +99,7 @@ class _CandidateAvatar extends StatelessWidget {
                 pictureUrl!,
                 width: _avatarSize,
                 height: _avatarSize,
-                fit: BoxFit.cover, // Ensures exact 1x1 square crop
+                fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) =>
                     _buildFallbackIcon(theme),
                 loadingBuilder: (context, child, loadingProgress) {
@@ -94,8 +108,8 @@ class _CandidateAvatar extends StatelessWidget {
                     color: theme.colorScheme.surfaceContainerHighest,
                     child: const Center(
                       child: SizedBox(
-                        width: 20,
-                        height: 20,
+                        width: 18,
+                        height: 18,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       ),
                     ),
@@ -111,8 +125,8 @@ class _CandidateAvatar extends StatelessWidget {
     return ColoredBox(
       color: theme.colorScheme.surfaceContainerHighest,
       child: Icon(
-        Icons.person,
-        size: 32,
+        Icons.person_rounded,
+        size: 28,
         color: theme.colorScheme.onSurfaceVariant,
       ),
     );
