@@ -2,9 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:location_repository/location_repository.dart'; 
+import 'package:location_repository/location_repository.dart';
 import 'package:supabase_database_client/supabase_database_client.dart';
 import 'package:veto/features/app_shell/view/app_shell.dart';
+import 'package:veto/features/candidates/data/repositories/candidate_repository.dart';
 import 'package:veto/features/settings/bloc/settings_bloc.dart';
 import 'package:veto/l10n/l10n.dart';
 
@@ -27,6 +28,11 @@ class App extends StatelessWidget {
         RepositoryProvider.value(value: _databaseClient),
         RepositoryProvider(
           create: (context) => LocationRepository(
+            databaseClient: _databaseClient,
+          ),
+        ),
+        RepositoryProvider(
+          create: (context) => CandidateRepository(
             databaseClient: _databaseClient,
           ),
         ),

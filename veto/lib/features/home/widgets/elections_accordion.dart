@@ -1,8 +1,12 @@
 // lib/features/home/widgets/elections_accordion.dart
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:veto/features/candidate_info/view/candidate_info_page.dart';
 import 'package:veto/features/candidates/data/models/candidate_model.dart';
+import 'package:veto/features/candidates/data/repositories/candidate_repository.dart';
 import 'package:veto/features/home/bloc/home_bloc.dart';
 import 'package:veto/features/home/bloc/home_event.dart';
 import 'package:veto/features/home/bloc/home_state.dart';
@@ -218,7 +222,15 @@ class _PositionGroupCard extends StatelessWidget {
                       party: candidate.party,
                       pictureUrl: candidate.photoUrl,
                       onTap: () {
-                        // TODO(candidate): Navigate to candidate detail page.
+                        unawaited(
+                          Navigator.of(context).push(
+                            CandidateInfoPage.route(
+                              candidateId: candidate.id,
+                              candidateRepository:
+                                  context.read<CandidateRepository>(),
+                            ),
+                          ),
+                        );
                       },
                     ),
                   )
