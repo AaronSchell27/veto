@@ -3,6 +3,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:veto/features/candidate_info/bloc/candidate_info_event.dart';
 import 'package:veto/features/candidate_info/bloc/candidate_info_state.dart';
+import 'package:veto/features/candidates/data/models/candidate_model.dart';
 import 'package:veto/features/candidates/data/repositories/candidate_repository.dart';
 
 class CandidateInfoBloc extends Bloc<CandidateInfoEvent, CandidateInfoState> {
@@ -22,14 +23,20 @@ class CandidateInfoBloc extends Bloc<CandidateInfoEvent, CandidateInfoState> {
     try {
       final candidate =
           await _candidateRepository.getCandidateById(event.candidateId);
-      final stances =
-          await _candidateRepository.getStancesForCandidate(event.candidateId);
+
+      final stancesFuture =
+          _candidateRepository.getStancesForCandidate(event.candidateId);
+      final positionsFuture =
+          _candidateRepository.getPositionsForCandidate(event.candidateId);
+
+      final results = await Future.wait([stancesFuture, positionsFuture]);
 
       emit(
         state.copyWith(
           status: CandidateInfoStatus.success,
           candidate: candidate,
-          stances: stances,
+          stances: results[0] as List<CandidateStance>,
+          positions: results[1] as List<CandidatePosition>,
         ),
       );
     } on Exception catch (e) {

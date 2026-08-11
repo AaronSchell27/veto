@@ -1,6 +1,7 @@
 // lib/features/candidates/data/models/candidate_model.dart
 
 import 'package:equatable/equatable.dart';
+import 'package:intl/intl.dart';
 
 class Candidate extends Equatable {
   const Candidate({
@@ -14,6 +15,7 @@ class Candidate extends Equatable {
     this.city,
     this.photoUrl,
     this.stances = const [],
+    this.positions = const [],
   });
 
   factory Candidate.fromJson(
@@ -31,6 +33,7 @@ class Candidate extends Equatable {
     }
 
     final stancesJson = json['stances'] as List<dynamic>?;
+    final positionsJson = json['positions'] as List<dynamic>?;
 
     return Candidate(
       id: json['id'] as int,
@@ -47,6 +50,11 @@ class Candidate extends Equatable {
               .map((e) => CandidateStance.fromJson(e as Map<String, dynamic>))
               .toList()
           : const [],
+      positions: positionsJson != null
+          ? positionsJson
+              .map((e) => CandidatePosition.fromJson(e as Map<String, dynamic>))
+              .toList()
+          : const [],
     );
   }
 
@@ -60,6 +68,7 @@ class Candidate extends Equatable {
   final String role;
   final String? photoUrl;
   final List<CandidateStance> stances;
+  final List<CandidatePosition> positions;
 
   String get fullName => '$firstName $lastName';
 
@@ -75,6 +84,7 @@ class Candidate extends Equatable {
         role,
         photoUrl,
         stances,
+        positions,
       ];
 }
 
@@ -84,20 +94,27 @@ class CandidateStance extends Equatable {
     required this.agree,
     required this.statement,
     this.issueDescription,
+    this.sourceUrl,
   });
 
   factory CandidateStance.fromJson(Map<String, dynamic> json) {
-    // Cast nested issues join table map to prevent avoid_dynamic_calls lint error
     final issuesMap = json['issues'] as Map<String, dynamic>?;
 
     return CandidateStance(
-      issueName: json['issue_name'] as String? ??
-          issuesMap?['name'] as String? ??
-          '',
+      issueName: issuesMap?['name'] as String? ??
+          json['issue_name'] as String? ??
+          issuesMap?['title'] as String? ??
+          'Unknown Issue',
       agree: json['agree'] as bool? ?? true,
-      statement: json['statement'] as String? ?? '',
-      issueDescription: json['issue_description'] as String? ??
-          issuesMap?['description'] as String?,
+      statement: json['statement'] as String? ??
+          json['stance'] as String? ??
+          json['description'] as String? ??
+          '',
+      issueDescription: issuesMap?['description'] as String? ??
+          json['issue_description'] as String?,
+      sourceUrl: json['source_url'] as String? ??
+          json['source'] as String? ??
+          json['url'] as String?,
     );
   }
 
@@ -105,7 +122,72 @@ class CandidateStance extends Equatable {
   final bool agree;
   final String statement;
   final String? issueDescription;
+  final String? sourceUrl;
 
   @override
-  List<Object?> get props => [issueName, agree, statement, issueDescription];
+  List<Object?> get props => [
+        issueName,
+        agree,
+        statement,
+        issueDescription,
+        sourceUrl,
+      ];
+}
+
+class CandidatePosition extends Equatable {
+  const CandidatePosition({
+    required this.entity,
+    required this.position,
+    required this.startDate,
+    this.endDate,
+  });
+
+  factory CandidatePosition.fromJson(Map<String, dynamic> json) {
+    return CandidatePosition(
+      entity: json['entity'] as String? ?? '',
+      position: json['position'] as String? ?? '',
+      startDate: json['start_date'] != null
+          ? DateTime.tryParse(json['start_date'].toString()) ?? DateTime.now()
+          : DateTime.now(),
+      endDate: json['end_date'] != null
+          ? DateTime.tryParse(json['end_date'].toString())
+          : null,
+    );
+  }
+
+  final String entity;
+  final String position;
+  final DateTime startDate;
+  final DateTime? endDate;
+
+  String get dateRangeString {
+    final startFormatted = DateFormat('MMM yyyy').format(startDate);
+    if (endDate == null) {
+      return '$startFormatted – Present';
+    }
+    final endFormatted = DateFormat('MMM yyyy').format(endDate!);
+    return '$startFormatted – $endFormatted';
+  }
+
+  String get durationString {
+    final targetEndDate = endDate ?? DateTime.now();
+    final totalMonths =
+        ((targetEndDate.year - startDate.year) * 12) + targetEndDate.month - startDate.month;
+
+    final years = totalMonths ~/ 12;
+    final months = totalMonths % 12;
+
+    if (years == 0 && months == 0) return 'Less than a month';
+
+    final yearPart = years > 0 ? '$years yr${years > 1 ? 's' : ''}' : '';
+    final monthPart = months > 0 ? '$months mo${months > 1 ? 's' : ''}' : '';
+
+    if (yearPart.isNotEmpty && monthPart.isNotEmpty) {
+      return '$yearPart $monthPart';
+    }
+    return yearPart.isNotEmpty ? yearPart : monthPart;
+  }
+
+  @override
+  List<Object?> get props => [entity, position, startDate, endDate];
 }

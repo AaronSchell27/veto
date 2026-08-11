@@ -28,16 +28,38 @@ class CandidateRepository {
     final response = await _supabase
         .from('candidate_stances')
         .select('''
-          *,
-          issues (
+          candidate_id,
+          issue_id,
+          agree,
+          statement,
+          source_url,
+          issues!candidate_stances_issue_id_fkey (
+            id,
             name,
-            description
+            description,
+            category
           )
         ''')
         .eq('candidate_id', candidateId);
 
-    return (response as List<dynamic>)
+    final dataList = response as List<dynamic>;
+
+    return dataList
         .map((json) => CandidateStance.fromJson(json as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<List<CandidatePosition>> getPositionsForCandidate(int candidateId) async {
+    final response = await _supabase
+        .from('candidate_positions')
+        .select()
+        .eq('candidate_id', candidateId)
+        .order('start_date', ascending: false);
+
+    final dataList = response as List<dynamic>;
+
+    return dataList
+        .map((json) => CandidatePosition.fromJson(json as Map<String, dynamic>))
         .toList();
   }
 }
