@@ -18,11 +18,11 @@ Veto is a cross-platform mobile application designed to bridge the gap between v
 ### Repository Structure
 
 Following the Very Good Ventures standard, the codebase is structured cleanly by feature layers rather than generic type folders: 
-
+```text
 lib/
 ├── app/                           # Global app configuration, theme, and routing
-│   ├── view/
-│   └── app.dart
+├── view/
+│    └── app.dart
 ├── bootstrap.dart                 # Global initialization (Supabase configuration, any observers)
 ├── main_development.dart          # Flavor-specific entry points
 ├── main_production.dart
@@ -33,7 +33,7 @@ lib/
         ├── view/                  # UI components and view pages
         ├── widgets/               # Feature-specific reusable UI components
         └── candidate_profile.dart # Barrel File
-
+```
 ### Key Technical Implementation Details
 
 * **Separation of Concerns**: UI components remain purely presentational, responding strictly to states emitted by the BLoC layer.
@@ -44,31 +44,31 @@ lib/
 
 ### Prerequisites
 
-* [Flutter SDK](https://docs.flutter.dev/get-started/install) (Ensure your version matches the project's SDK constraints)
-* [Very Good CLI](https://pub.dev/packages/very_good_cli) (Optional, but recommended for VGV standard maintenance)
-* Supabase Project URL and Anon Key
+* Flutter SDK: https://docs.flutter.dev/get-started/install (Ensure your version matches the project's SDK constraints)
+* Very Good CLI: https://pub.dev/packages/very_good_cli (Optional, but recommended for VGV standard maintenance)
+* Supabase Project URL: https://rttcxycxzitlwwkbtnoj.supabase.co and Anon Key: sb_publishable_FhXgMdId4X-lTiJIDtJgpw_EvyCNdaf
 
 ### Installation & Run
 
 1. **Clone the repository**: 
 
-**bash**:
+  **bash**:
 
-git clone https://github.com/AaronSchell27/veto.git
-cd veto
+    git clone https://github.com/AaronSchell27/veto.git
+    cd veto
 
 2. **Get all dependencies**: 
 
-**bash**:
+  **bash**:
 
-flutter pub get
+    flutter pub get
 
 3. **Configure your local environment variables**:
 
-Create a .env file or provide environment definitions via --dart-define configurations for your Supabase keys.
+  Create a .env file or provide environment definitions via --dart-define configurations for your Supabase keys.
 
 4. **Run the application using the development flavor**: 
 
-**bash**:
+  **bash**:
 
-flutter run --flavor development -t lib/main_development.dart
+    flutter run --flavor development -t lib/main_development.dart
