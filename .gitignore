@@ -6,3 +6,6 @@ veto/macos/Flutter/GeneratedPluginRegistrant.swift
 veto/windows/flutter/generated_plugin_registrant.cc
 veto/windows/flutter/generated_plugin_registrant.h
 veto/windows/flutter/generated_plugins.cmake
+veto/linux/flutter/generated_plugin_registrant.cc
+veto/linux/flutter/generated_plugin_registrant.h
+veto/linux/flutter/generated_plugins.cmake
