@@ -2,7 +2,6 @@
 
 import 'package:equatable/equatable.dart';
 import 'package:veto/features/candidates/data/models/candidate_model.dart';
-import 'package:veto/features/home/bloc/home_event.dart';
 import 'package:veto/features/home/models/location_models.dart';
 
 enum HomeStatus { initial, loading, success, failure }
@@ -31,18 +30,20 @@ final class HomeState extends Equatable {
   final bool hasSubmittedLocation;
   final bool isFetchingCandidates;
   final ElectionTier? selectedElectionTier;
-  
+
   final List<Country> countries;
   final List<Region> availableRegions;
-  
+
   final Country? selectedCountry;
   final Region? selectedRegion;
   final String cityInput;
 
   final List<Candidate> candidates;
 
-  bool get isLocationFormValid => 
-      selectedCountry != null && selectedRegion != null && cityInput.trim().isNotEmpty;
+  bool get isLocationFormValid =>
+      selectedCountry != null &&
+      selectedRegion != null &&
+      cityInput.trim().isNotEmpty;
 
   /// Returns true if the selected country is US/USA or matches 'US'.
   bool get isUSLocation {
@@ -76,18 +77,23 @@ final class HomeState extends Equatable {
   }) {
     return HomeState(
       status: status ?? this.status,
-      errorMessage: clearErrorMessage ? null : (errorMessage ?? this.errorMessage),
+      errorMessage:
+          clearErrorMessage ? null : (errorMessage ?? this.errorMessage),
       isDarkMode: isDarkMode ?? this.isDarkMode,
-      showLocationOnboarding: showLocationOnboarding ?? this.showLocationOnboarding,
-      hasSubmittedLocation: hasSubmittedLocation ?? this.hasSubmittedLocation,
-      isFetchingCandidates: isFetchingCandidates ?? this.isFetchingCandidates,
+      showLocationOnboarding:
+          showLocationOnboarding ?? this.showLocationOnboarding,
+      hasSubmittedLocation:
+          hasSubmittedLocation ?? this.hasSubmittedLocation,
+      isFetchingCandidates:
+          isFetchingCandidates ?? this.isFetchingCandidates,
       selectedElectionTier: clearSelectedElectionTier
           ? null
           : (selectedElectionTier ?? this.selectedElectionTier),
       countries: countries ?? this.countries,
       availableRegions: availableRegions ?? this.availableRegions,
       selectedCountry: selectedCountry ?? this.selectedCountry,
-      selectedRegion: clearSelectedRegion ? null : (selectedRegion ?? this.selectedRegion),
+      selectedRegion:
+          clearSelectedRegion ? null : (selectedRegion ?? this.selectedRegion),
       cityInput: cityInput ?? this.cityInput,
       candidates: candidates ?? this.candidates,
     );

@@ -10,6 +10,7 @@ import 'package:veto/features/candidates/data/repositories/candidate_repository.
 import 'package:veto/features/home/bloc/home_bloc.dart';
 import 'package:veto/features/home/bloc/home_event.dart';
 import 'package:veto/features/home/bloc/home_state.dart';
+import 'package:veto/features/home/models/location_models.dart';
 import 'package:veto/features/home/widgets/candidate_card.dart';
 
 /// {@template elections_accordion}
@@ -80,7 +81,7 @@ class ElectionsAccordion extends StatelessWidget {
   }
 }
 
-class _AccordionTile extends StatelessWidget {
+class _AccordionTile extends StatefulWidget {
   const _AccordionTile({
     required this.title,
     required this.tier,
@@ -92,9 +93,40 @@ class _AccordionTile extends StatelessWidget {
   final HomeState state;
 
   @override
+  State<_AccordionTile> createState() => _AccordionTileState();
+}
+
+class _AccordionTileState extends State<_AccordionTile> {
+  late final ExpansibleController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = ExpansibleController();
+  }
+
+  @override
+  void didUpdateWidget(covariant _AccordionTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final shouldBeExpanded = widget.state.selectedElectionTier == widget.tier;
+
+    if (shouldBeExpanded && !_controller.isExpanded) {
+      _controller.expand();
+    } else if (!shouldBeExpanded && _controller.isExpanded) {
+      _controller.collapse();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isExpanded = state.selectedElectionTier == tier;
+    final isExpanded = widget.state.selectedElectionTier == widget.tier;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
@@ -102,37 +134,37 @@ class _AccordionTile extends StatelessWidget {
       color: theme.colorScheme.surfaceContainerLow,
       clipBehavior: Clip.antiAlias,
       child: ExpansionTile(
-        key: Key('accordion_tile_${tier.name}_$isExpanded'),
+        controller: _controller,
         initiallyExpanded: isExpanded,
         title: Text(
-          title,
+          widget.title,
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
           ),
         ),
         onExpansionChanged: (expanded) {
           if (expanded) {
-            context.read<HomeBloc>().add(HomeElectionTierChanged(tier));
-          } else if (state.selectedElectionTier == tier) {
+            context.read<HomeBloc>().add(HomeElectionTierChanged(widget.tier));
+          } else if (widget.state.selectedElectionTier == widget.tier) {
             context.read<HomeBloc>().add(const HomeLocationSubmitted());
           }
         },
         children: [
           if (isExpanded) ...[
-            if (state.isFetchingCandidates)
+            if (widget.state.isFetchingCandidates)
               const Padding(
                 padding: EdgeInsets.all(24),
                 child: Center(
                   child: CircularProgressIndicator(strokeWidth: 2.5),
                 ),
               )
-            else if (state.candidates.isEmpty)
+            else if (widget.state.candidates.isEmpty)
               Padding(
                 padding: const EdgeInsets.all(16),
-                child: Text('No $title candidates available for this region.'),
+                child: Text('No ${widget.title} candidates available for this region.'),
               )
             else
-              _GroupedCandidatesList(candidates: state.candidates),
+              _GroupedCandidatesList(candidates: widget.state.candidates),
           ],
         ],
       ),

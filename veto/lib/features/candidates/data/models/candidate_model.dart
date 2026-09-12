@@ -2,6 +2,7 @@
 
 import 'package:equatable/equatable.dart';
 import 'package:intl/intl.dart';
+import 'package:veto/features/home/models/location_models.dart';
 
 class Candidate extends Equatable {
   const Candidate({
@@ -14,6 +15,7 @@ class Candidate extends Equatable {
     this.stateId,
     this.city,
     this.photoUrl,
+    this.tier,
     this.stances = const [],
     this.positions = const [],
   });
@@ -22,29 +24,60 @@ class Candidate extends Equatable {
     Map<String, dynamic> json, {
     String? bucketPublicUrlBase,
   }) {
-    final rawPictureUrl =
-        json['picture_url'] as String? ?? json['photo_url'] as String?;
+    // Check all potential database schema key variations
+    final rawPictureUrl = json['picture_url'] as String? ??
+        json['photo_url'] as String? ??
+        json['avatar_url'] as String? ??
+        json['image_url'] as String?;
 
-    var resolvedPhotoUrl = rawPictureUrl;
-    if (rawPictureUrl != null &&
-        !rawPictureUrl.startsWith('http') &&
+    var resolvedPhotoUrl = rawPictureUrl?.trim();
+
+    // If string is non-empty and relative, append bucket base URL if provided
+    if (resolvedPhotoUrl != null &&
+        resolvedPhotoUrl.isNotEmpty &&
+        !resolvedPhotoUrl.startsWith('http://') &&
+        !resolvedPhotoUrl.startsWith('https://') &&
         bucketPublicUrlBase != null) {
-      resolvedPhotoUrl = '$bucketPublicUrlBase/$rawPictureUrl';
+      final cleanBase = bucketPublicUrlBase.endsWith('/')
+          ? bucketPublicUrlBase.substring(0, bucketPublicUrlBase.length - 1)
+          : bucketPublicUrlBase;
+      final cleanPath = resolvedPhotoUrl.startsWith('/')
+          ? resolvedPhotoUrl.substring(1)
+          : resolvedPhotoUrl;
+      resolvedPhotoUrl = '$cleanBase/$cleanPath';
     }
 
     final stancesJson = json['stances'] as List<dynamic>?;
     final positionsJson = json['positions'] as List<dynamic>?;
 
+    ElectionTier? parsedTier;
+    final rawTier = json['tier'] as String? ?? json['jurisdiction'] as String?;
+    if (rawTier != null) {
+      final cleanTier = rawTier.toLowerCase().trim();
+      if (cleanTier.contains('federal') || cleanTier.contains('national')) {
+        parsedTier = ElectionTier.federal;
+      } else if (cleanTier.contains('state')) {
+        parsedTier = ElectionTier.state;
+      } else if (cleanTier.contains('local') ||
+          cleanTier.contains('city') ||
+          cleanTier.contains('county')) {
+        parsedTier = ElectionTier.local;
+      }
+    }
+
     return Candidate(
-      id: json['id'] as int,
-      firstName: json['first_name'] as String,
-      lastName: json['last_name'] as String,
-      countryId: (json['country_id'] ?? json['country']) as String,
+      id: json['id'] is int ? json['id'] as int : int.parse(json['id'].toString()),
+      firstName: json['first_name'] as String? ?? '',
+      lastName: json['last_name'] as String? ?? '',
+      countryId: (json['country_id'] ?? json['country'] ?? 'US') as String,
       stateId: json['state_id'] as String?,
       city: json['city'] as String?,
-      party: json['party'] as String,
+      party: json['party'] as String? ?? 'Independent',
       role: json['role'] as String? ?? 'Candidate',
-      photoUrl: resolvedPhotoUrl,
+      photoUrl: (resolvedPhotoUrl != null && resolvedPhotoUrl.isNotEmpty)
+          ? resolvedPhotoUrl
+          : null,
+      tier: parsedTier,
       stances: stancesJson != null
           ? stancesJson
               .map((e) => CandidateStance.fromJson(e as Map<String, dynamic>))
@@ -67,10 +100,81 @@ class Candidate extends Equatable {
   final String party;
   final String role;
   final String? photoUrl;
+  final ElectionTier? tier;
   final List<CandidateStance> stances;
   final List<CandidatePosition> positions;
 
   String get fullName => '$firstName $lastName';
+
+  ElectionTier get inferredTier {
+    if (tier != null) return tier!;
+
+    final r = role.toLowerCase().trim();
+
+    if (r.contains('president') ||
+        r.contains('u.s. senate') ||
+        r.contains('us senate') ||
+        r.contains('u.s. senator') ||
+        r.contains('us senator') ||
+        r.contains('u.s. house') ||
+        r.contains('us house') ||
+        r.contains('u.s. representative') ||
+        r.contains('us representative') ||
+        r.contains('congress')) {
+      return ElectionTier.federal;
+    }
+
+    if (r.contains('governor') ||
+        r.contains('attorney general') ||
+        r.contains('secretary of state') ||
+        r.contains('state treasurer') ||
+        r.contains('state senator') ||
+        r.contains('state representative') ||
+        r.contains('state rep') ||
+        r.contains('state house') ||
+        r.contains('state assembly') ||
+        r.contains('state supreme court') ||
+        r.contains('lieutenant governor')) {
+      return ElectionTier.state;
+    }
+
+    if (r.contains('mayor') ||
+        r.contains('city council') ||
+        r.contains('sheriff') ||
+        r.contains('county') ||
+        r.contains('district attorney') ||
+        r.contains('school board') ||
+        r.contains('alderman') ||
+        r.contains('commissioner')) {
+      return ElectionTier.local;
+    }
+
+    if (city != null && city!.isNotEmpty) {
+      return ElectionTier.local;
+    }
+    if (stateId != null && stateId!.isNotEmpty) {
+      return ElectionTier.state;
+    }
+
+    return ElectionTier.federal;
+  }
+
+  Candidate copyWithPhotoUrl(String? photoUrl) {
+    return Candidate(
+      id: id,
+      firstName: firstName,
+      lastName: lastName,
+      countryId: countryId,
+      stateId: stateId,
+      city: city,
+      party: party,
+      role: role,
+      photoUrl: photoUrl ?? this.photoUrl,
+      tier: tier,
+      stances: stances,
+      positions: positions,
+    );
+  }
 
   @override
   List<Object?> get props => [
@@ -83,6 +187,7 @@ class Candidate extends Equatable {
         party,
         role,
         photoUrl,
+        tier,
         stances,
         positions,
       ];

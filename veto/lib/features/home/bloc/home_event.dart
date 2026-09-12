@@ -3,9 +3,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:veto/features/home/models/location_models.dart';
 
-/// Represents the scope level of elections.
-enum ElectionTier { local, state, federal }
-
 sealed class HomeEvent extends Equatable {
   const HomeEvent();
 

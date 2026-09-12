@@ -45,7 +45,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     try {
       final repoCountries = await _locationRepository.getCountries();
       final uiCountries = repoCountries.map((c) => Country(id: c.id, name: c.name)).toList();
-      
+
       emit(state.copyWith(
         status: HomeStatus.success,
         countries: uiCountries,
@@ -74,7 +74,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     try {
       final repoRegions = await _locationRepository.getRegionsByCountry(event.country.id);
       final uiRegions = repoRegions.map((r) => Region(id: r.id, name: r.name, countryId: r.countryId)).toList();
-      
+
       emit(state.copyWith(
         status: HomeStatus.success,
         availableRegions: uiRegions,
@@ -148,7 +148,10 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     HomeCandidatesRequested event,
     Emitter<HomeState> emit,
   ) async {
-    if (state.selectedElectionTier == null || state.selectedCountry == null) {
+    final selectedTier = state.selectedElectionTier;
+    final selectedCountry = state.selectedCountry;
+
+    if (selectedTier == null || selectedCountry == null) {
       return;
     }
 
@@ -158,23 +161,30 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           await _supabaseDatabaseClient.getUsNationalCandidates();
 
       final allCandidates = rawCandidates.map((json) {
-        final rawPath =
-            json['picture_url'] as String? ?? json['photo_url'] as String?;
+        final rawPath = json['picture_url'] as String? ??
+            json['photo_url'] as String? ??
+            json['avatar_url'] as String? ??
+            json['image_url'] as String?;
+
         String? fullPhotoUrl;
 
-        if (rawPath != null && rawPath.isNotEmpty) {
-          fullPhotoUrl = rawPath.startsWith('http')
-              ? rawPath
-              : _supabaseDatabaseClient.getPublicStorageUrl(
-                  bucketName: _candidateBucketName,
-                  path: rawPath,
-                );
+        if (rawPath != null && rawPath.trim().isNotEmpty) {
+          final cleanPath = rawPath.trim();
+          if (cleanPath.startsWith('http://') || cleanPath.startsWith('https://')) {
+            fullPhotoUrl = cleanPath;
+          } else {
+            fullPhotoUrl = _supabaseDatabaseClient.getPublicStorageUrl(
+              bucketName: _candidateBucketName,
+              path: cleanPath,
+            );
+          }
         }
 
-        return Candidate.fromJson(json).copyWithPhotoUrl(fullPhotoUrl);
+        final candidate = Candidate.fromJson(json);
+        return fullPhotoUrl != null ? candidate.copyWithPhotoUrl(fullPhotoUrl) : candidate;
       }).toList();
 
-      final userCountry = state.selectedCountry!.id.trim().toUpperCase();
+      final userCountry = selectedCountry.id.trim().toUpperCase();
       final userRegion = state.selectedRegion?.id.trim().toUpperCase();
       final userCity = state.cityInput.trim().toLowerCase();
 
@@ -183,25 +193,20 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         final cState = candidate.stateId?.trim().toUpperCase();
         final cCity = candidate.city?.trim().toLowerCase();
 
-        final hasState = cState != null && cState.isNotEmpty;
-        final hasCity = cCity != null && cCity.isNotEmpty;
+        if (cCountry != userCountry) return false;
+        if (candidate.inferredTier != selectedTier) return false;
 
-        switch (state.selectedElectionTier!) {
-          case ElectionTier.federal:
-            return cCountry == userCountry && !hasState && !hasCity;
+        switch (selectedTier) {
+          case ElectionTier.local:
+            final matchesState = cState == null || cState.isEmpty || userRegion == null || cState == userRegion;
+            final matchesCity = cCity == null || cCity.isEmpty || userCity.isEmpty || cCity == userCity;
+            return matchesState && matchesCity;
 
           case ElectionTier.state:
-            return cCountry == userCountry &&
-                hasState &&
-                (userRegion == null || cState == userRegion) &&
-                !hasCity;
+            return cState == null || cState.isEmpty || userRegion == null || cState == userRegion;
 
-          case ElectionTier.local:
-            return cCountry == userCountry &&
-                hasState &&
-                (userRegion == null || cState == userRegion) &&
-                hasCity &&
-                cCity == userCity;
+          case ElectionTier.federal:
+            return cState == null || cState.isEmpty || userRegion == null || cState == userRegion;
         }
       }).toList();
 
@@ -234,21 +239,5 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       isFetchingCandidates: false,
       clearSelectedElectionTier: true,
     ));
-  }
-}
-
-extension on Candidate {
-  Candidate copyWithPhotoUrl(String? photoUrl) {
-    return Candidate(
-      id: id,
-      firstName: firstName,
-      lastName: lastName,
-      countryId: countryId,
-      stateId: stateId,
-      city: city,
-      party: party,
-      role: role,
-      photoUrl: photoUrl ?? this.photoUrl,
-    );
   }
 }
