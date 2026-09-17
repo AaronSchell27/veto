@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:veto/features/candidate_info/bloc/candidate_info_bloc.dart';
 import 'package:veto/features/candidate_info/bloc/candidate_info_state.dart';
 import 'package:veto/features/candidate_info/widgets/candidate_header_card.dart';
+import 'package:veto/features/candidate_info/widgets/donors_card.dart';
 import 'package:veto/features/candidate_info/widgets/stances_card.dart';
 
 class CandidateInfoView extends StatelessWidget {
@@ -67,17 +68,28 @@ class CandidateInfoView extends StatelessWidget {
                 );
               }
 
+              // Prefer state.candidate?.donors, falling back to candidate.donors
+              final donors = candidate.donors;
+
               return SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     CandidateHeaderCard(candidate: candidate),
                     const SizedBox(height: 24),
+
+                    // Stances and Work History
                     StancesCard(
                       stances: state.stances,
                       positions: state.positions,
                     ),
+                    const SizedBox(height: 24),
+                    Divider(color: theme.colorScheme.outlineVariant),
+                    const SizedBox(height: 24),
+
+                    // Donors Card rendered across the layout
+                    DonorsCard(donors: donors),
                   ],
                 ),
               );

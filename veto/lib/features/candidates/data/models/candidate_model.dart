@@ -18,6 +18,7 @@ class Candidate extends Equatable {
     this.tier,
     this.stances = const [],
     this.positions = const [],
+    this.donors = const [],
   });
 
   factory Candidate.fromJson(
@@ -49,6 +50,8 @@ class Candidate extends Equatable {
 
     final stancesJson = json['stances'] as List<dynamic>?;
     final positionsJson = json['positions'] as List<dynamic>?;
+    final donorsJson = json['donors'] as List<dynamic>? ??
+        json['candidate_donors'] as List<dynamic>?;
 
     ElectionTier? parsedTier;
     final rawTier = json['tier'] as String? ?? json['jurisdiction'] as String?;
@@ -88,6 +91,11 @@ class Candidate extends Equatable {
               .map((e) => CandidatePosition.fromJson(e as Map<String, dynamic>))
               .toList()
           : const [],
+      donors: donorsJson != null
+          ? donorsJson
+              .map((e) => CandidateDonor.fromJson(e as Map<String, dynamic>))
+              .toList()
+          : const [],
     );
   }
 
@@ -103,6 +111,7 @@ class Candidate extends Equatable {
   final ElectionTier? tier;
   final List<CandidateStance> stances;
   final List<CandidatePosition> positions;
+  final List<CandidateDonor> donors;
 
   String get fullName => '$firstName $lastName';
 
@@ -173,6 +182,7 @@ class Candidate extends Equatable {
       tier: tier,
       stances: stances,
       positions: positions,
+      donors: donors,
     );
   }
 
@@ -190,6 +200,7 @@ class Candidate extends Equatable {
         tier,
         stances,
         positions,
+        donors,
       ];
 }
 
@@ -295,4 +306,40 @@ class CandidatePosition extends Equatable {
 
   @override
   List<Object?> get props => [entity, position, startDate, endDate];
+}
+
+class CandidateDonor extends Equatable {
+  const CandidateDonor({
+    required this.name,
+    required this.amount,
+    this.id,
+    this.candidateId,
+  });
+
+  factory CandidateDonor.fromJson(Map<String, dynamic> json) {
+    return CandidateDonor(
+      id: json['id'] != null
+          ? (json['id'] is int
+              ? json['id'] as int
+              : int.tryParse(json['id'].toString()))
+          : null,
+      candidateId: json['candidate_id'] != null
+          ? (json['candidate_id'] is int
+              ? json['candidate_id'] as int
+              : int.tryParse(json['candidate_id'].toString()))
+          : null,
+      name: json['name'] as String? ?? json['donor_name'] as String? ?? '',
+      amount: (json['amount'] is num)
+          ? (json['amount'] as num).toInt()
+          : int.tryParse(json['amount']?.toString() ?? '0') ?? 0,
+    );
+  }
+
+  final int? id;
+  final int? candidateId;
+  final String name;
+  final int amount;
+
+  @override
+  List<Object?> get props => [id, candidateId, name, amount];
 }

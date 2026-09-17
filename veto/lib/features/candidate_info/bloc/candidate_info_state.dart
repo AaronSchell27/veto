@@ -11,6 +11,7 @@ class CandidateInfoState extends Equatable {
     this.candidate,
     this.stances = const [],
     this.positions = const [],
+    this.donors = const [],
     this.errorMessage,
   });
 
@@ -18,6 +19,7 @@ class CandidateInfoState extends Equatable {
   final Candidate? candidate;
   final List<CandidateStance> stances;
   final List<CandidatePosition> positions;
+  final List<CandidateDonor> donors;
   final String? errorMessage;
 
   CandidateInfoState copyWith({
@@ -25,6 +27,7 @@ class CandidateInfoState extends Equatable {
     Candidate? candidate,
     List<CandidateStance>? stances,
     List<CandidatePosition>? positions,
+    List<CandidateDonor>? donors,
     String? errorMessage,
   }) {
     return CandidateInfoState(
@@ -32,10 +35,18 @@ class CandidateInfoState extends Equatable {
       candidate: candidate ?? this.candidate,
       stances: stances ?? this.stances,
       positions: positions ?? this.positions,
+      donors: donors ?? this.donors,
       errorMessage: errorMessage ?? this.errorMessage,
     );
   }
 
   @override
-  List<Object?> get props => [status, candidate, stances, positions, errorMessage];
+  List<Object?> get props => [
+        status,
+        candidate,
+        stances,
+        positions,
+        donors,
+        errorMessage,
+      ];
 }

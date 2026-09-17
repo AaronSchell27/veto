@@ -1,5 +1,6 @@
 // lib/features/home/bloc/home_bloc.dart
 
+import 'dart:developer' as developer;
 import 'package:bloc/bloc.dart';
 import 'package:location_repository/location_repository.dart';
 import 'package:supabase_database_client/supabase_database_client.dart';
@@ -15,7 +16,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     required LocationRepository locationRepository,
     required SettingsBloc settingsBloc,
     required SupabaseDatabaseClient supabaseDatabaseClient,
-    String candidateBucketName = 'candidate-photos',
+    String candidateBucketName = 'candidate-pictures',
   })  : _locationRepository = locationRepository,
         _settingsBloc = settingsBloc,
         _supabaseDatabaseClient = supabaseDatabaseClient,
@@ -181,7 +182,14 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         }
 
         final candidate = Candidate.fromJson(json);
-        return fullPhotoUrl != null ? candidate.copyWithPhotoUrl(fullPhotoUrl) : candidate;
+        final resultCandidate = fullPhotoUrl != null ? candidate.copyWithPhotoUrl(fullPhotoUrl) : candidate;
+
+        developer.log(
+          'Candidate: ${resultCandidate.fullName} | Raw Path: $rawPath | Resolved URL: ${resultCandidate.photoUrl}',
+          name: 'HomeBloc',
+        );
+
+        return resultCandidate;
       }).toList();
 
       final userCountry = selectedCountry.id.trim().toUpperCase();
@@ -198,15 +206,29 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
         switch (selectedTier) {
           case ElectionTier.local:
-            final matchesState = cState == null || cState.isEmpty || userRegion == null || cState == userRegion;
-            final matchesCity = cCity == null || cCity.isEmpty || userCity.isEmpty || cCity == userCity;
+            final matchesState = userRegion == null ||
+                userRegion.isEmpty ||
+                cState == null ||
+                cState.isEmpty ||
+                cState == userRegion;
+            final matchesCity = userCity.isEmpty ||
+                cCity == null ||
+                cCity.isEmpty ||
+                cCity == userCity;
             return matchesState && matchesCity;
 
           case ElectionTier.state:
-            return cState == null || cState.isEmpty || userRegion == null || cState == userRegion;
+            return userRegion == null ||
+                userRegion.isEmpty ||
+                cState == null ||
+                cState.isEmpty ||
+                cState == userRegion;
 
           case ElectionTier.federal:
-            return cState == null || cState.isEmpty || userRegion == null || cState == userRegion;
+            if (cState != null && cState.isNotEmpty && userRegion != null && userRegion.isNotEmpty) {
+              return cState == userRegion;
+            }
+            return true;
         }
       }).toList();
 

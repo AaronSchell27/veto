@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:supabase_database_client/supabase_database_client.dart';
 import 'package:veto/features/candidate_info/bloc/candidate_info_bloc.dart';
 import 'package:veto/features/candidate_info/bloc/candidate_info_event.dart';
 import 'package:veto/features/candidate_info/view/candidate_info_view.dart';
@@ -32,6 +33,7 @@ class CandidateInfoPage extends StatelessWidget {
     return BlocProvider(
       create: (context) => CandidateInfoBloc(
         candidateRepository: context.read<CandidateRepository>(),
+        supabaseDatabaseClient: context.read<SupabaseDatabaseClient>(),
       )..add(CandidateInfoRequested(candidateId)),
       child: const CandidateInfoView(),
     );
